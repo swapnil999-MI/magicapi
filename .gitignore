@@ -1,0 +1,29 @@
+# Binaries and compiled targets
+/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+magicapi
+openapi-doc-studio
+
+# Dependencies
+frontend/node_modules/
+node_modules/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+
+# Frontend cache and tsbuildinfo
+frontend/*.tsbuildinfo
+
+# Editor and IDE metadata
+.idea/
+.vscode/
+*.swp
+*~

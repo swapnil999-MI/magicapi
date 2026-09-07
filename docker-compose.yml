@@ -1,0 +1,24 @@
+services:
+  magicapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: swapnilmi/magicapi:latest
+    container_name: magicapi-studio
+    ports:
+      - "8085:8085/tcp"
+      - "8085:8085/udp" # HTTP/3 (QUIC)
+    environment:
+      - PORT=8085
+      - HOST=0.0.0.0
+      - ENABLE_HTTP3=true
+      - OPENAPI_SPEC_PATH=/app/openapi.yaml
+    volumes:
+      # Mount your custom OpenAPI YAML or JSON spec:
+      - ./openapi.yaml:/app/openapi.yaml:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 3

@@ -1,0 +1,57 @@
+/auth/login:
+  post:
+    tags:
+      - Authentication
+    summary: User Authentication Login
+    description: Authenticates user credentials and returns session tokens.
+    x-created-at: "2026-08-15T09:00:00Z"
+    x-updated-at: "2026-08-20T10:00:00Z"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+                format: email
+                example: "admin@example.com"
+              password:
+                type: string
+                format: password
+                example: "SecretPassword123!"
+    responses:
+      '200':
+        description: Authentication successful
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                access_token:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                token_type:
+                  type: string
+                  example: "Bearer"
+                expires_in:
+                  type: integer
+                  example: 3600
+
+/auth/logout:
+  post:
+    tags:
+      - Authentication
+    summary: Logout Session
+    description: Invalidate the current session token.
+    x-created-at: "2026-08-15T09:00:00Z"
+    x-updated-at: "2026-08-20T10:00:00Z"
+    security:
+      - BearerAuth: []
+    responses:
+      '200':
+        description: Logged out successfully

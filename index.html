@@ -1,0 +1,4254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MagicAPI — Interactive Studio & Workspace</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta property="og:title" content="MagicAPI — Interactive Studio & Workspace" />
+  <meta property="og:description" content="MagicAPI - High-performance Interactive Documentation, Testing & MCP Protocol Engine" />
+  <meta property="og:image" content="magicapi-thumbnail.png" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="MagicAPI — Interactive Studio & Workspace" />
+  <meta name="twitter:description" content="MagicAPI - High-performance Interactive Documentation, Testing & MCP Protocol Engine" />
+  <meta name="twitter:image" content="magicapi-thumbnail.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <style>
+        :root, html[data-theme="dark"] {
+      --bg-app: #080b10;
+      --bg-sidebar: #0e131b;
+      --bg-card: #131924;
+      --bg-card-hover: #1b2333;
+      --bg-input: #06090e;
+      --border-color: #1c2638;
+      --border-focus: #3b82f6;
+      --border-hover: #2a374f;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --postman-orange: #ff6c37;
+      --method-get: #10b981;
+      --method-post: #ff6c37;
+      --method-put: #f59e0b;
+      --method-delete: #ef4444;
+      --method-patch: #a855f7;
+      --json-key: #93c5fd;
+      --json-str: #86efac;
+      --json-num: #fca5a5;
+      --json-bool: #fde047;
+      --json-null: #94a3b8;
+      --accent-glow: rgba(59, 130, 246, 0.15);
+      --font-mono: 'JetBrains Mono', -apple-system, monospace;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    html[data-theme="midnight"] {
+      --bg-app: #000000;
+      --bg-sidebar: #050608;
+      --bg-card: #0b0d12;
+      --bg-card-hover: #141722;
+      --bg-input: #000000;
+      --border-color: #171b26;
+      --border-focus: #6366f1;
+      --border-hover: #252b3d;
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+      --text-dim: #475569;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --accent-glow: rgba(99, 102, 241, 0.2);
+    }
+
+    html[data-theme="cyberpunk"] {
+      --bg-app: #070512;
+      --bg-sidebar: #0f0b24;
+      --bg-card: #171238;
+      --bg-card-hover: #241c57;
+      --bg-input: #05030e;
+      --border-color: #34266c;
+      --border-focus: #00f0ff;
+      --border-hover: #4c379e;
+      --text-main: #f5f3ff;
+      --text-muted: #c4b5fd;
+      --text-dim: #8b5cf6;
+      --primary: #d946ef;
+      --primary-hover: #c026d3;
+      --accent-glow: rgba(0, 240, 255, 0.25);
+    }
+
+    html[data-theme="light"] {
+      --bg-app: #f8fafc;
+      --bg-sidebar: #ffffff;
+      --bg-card: #f1f5f9;
+      --bg-card-hover: #e2e8f0;
+      --bg-input: #ffffff;
+      --border-color: #cbd5e1;
+      --border-focus: #2563eb;
+      --border-hover: #94a3b8;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --json-key: #0369a1;
+      --json-str: #15803d;
+      --json-num: #b91c1c;
+      --json-bool: #b45309;
+      --json-null: #64748b;
+      --accent-glow: rgba(37, 99, 235, 0.1);
+    }
+
+    /* Sidebar Segmented Tabs Navigation (Endpoints, History, Saved) */
+    .sidebar-tabs-nav {
+      display: flex;
+      background: var(--bg-input);
+      border-bottom: 1px solid var(--border-color);
+      padding: 4px 6px;
+      gap: 4px;
+    }
+
+    .sidebar-nav-btn {
+      flex: 1;
+      padding: 6px 4px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .sidebar-nav-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .sidebar-nav-btn.active {
+      background: var(--bg-card);
+      color: var(--text-main);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-count-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0 5px;
+      border-radius: 9999px;
+      color: var(--text-muted);
+    }
+
+    /* History & Collections list items */
+    .hist-item-row {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: background 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .hist-item-row:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .hist-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .hist-status-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    .hist-status-2xx { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .hist-status-4xx { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .hist-status-5xx { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+    /* Multi-Tab Workspace Header Bar */
+    .workspace-tabs-bar {
+      display: flex;
+      align-items: center;
+      background: var(--bg-sidebar);
+      border-bottom: 1px solid var(--border-color);
+      overflow-x: auto;
+      padding: 4px 10px 0 10px;
+      gap: 4px;
+      user-select: none;
+    }
+
+    .workspace-tabs-list {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      overflow-x: auto;
+    }
+
+    .workspace-tab {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      max-width: 200px;
+      transition: all 0.12s ease;
+    }
+
+    .workspace-tab:hover {
+      background: var(--bg-card);
+      color: var(--text-main);
+    }
+
+    .workspace-tab.active {
+      background: var(--bg-app);
+      border-color: var(--border-color);
+      color: var(--text-main);
+      font-weight: 600;
+      box-shadow: 0 -1px 3px rgba(0,0,0,0.15);
+    }
+
+    .workspace-tab-close {
+      opacity: 0.45;
+      font-size: 12px;
+      border-radius: 3px;
+      padding: 0 3px;
+    }
+
+    .workspace-tab-close:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ef4444;
+    }
+
+    .workspace-tab-dirty {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #f59e0b;
+      display: none;
+    }
+
+    .workspace-tab.dirty .workspace-tab-dirty {
+      display: block;
+    }
+
+    .btn-tab-action {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 15px;
+      padding: 4px 7px;
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-tab-action:hover {
+      background: var(--bg-card);
+      color: var(--text-main);
+    }
+
+    .btn-view-mode-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-view-mode-pill:hover, .btn-view-mode-pill.active {
+      border-color: var(--border-focus);
+      color: var(--text-main);
+      background: rgba(88, 166, 255, 0.15);
+    }
+
+    /* Modal Command Palette & Variables Overlay */
+    .cmd-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(6px);
+      z-index: 9999;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 10vh;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    .cmd-overlay.open {
+      display: flex;
+      opacity: 1;
+    }
+
+    .cmd-palette-box {
+      width: 100%;
+      max-width: 640px;
+      background: var(--bg-sidebar);
+      border: 1px solid var(--border-focus);
+      border-radius: 10px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cmd-search-wrap {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-input);
+    }
+
+    .cmd-search-wrap input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .cmd-results-list {
+      max-height: 380px;
+      overflow-y: auto;
+      padding: 6px;
+    }
+
+    .cmd-item-row {
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-muted);
+      transition: all 0.1s ease;
+    }
+
+    .cmd-item-row:hover, .cmd-item-row.selected {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+    }
+
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      scrollbar-width: thin;
+      scrollbar-color: #30363d transparent;
+    }
+
+    /* Custom Sleek Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #30363d;
+      border-radius: 9999px;
+      transition: background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #58a6ff;
+      box-shadow: 0 0 8px rgba(88, 166, 255, 0.4);
+    }
+
+    ::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    body {
+      background: var(--bg-app);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+
+    /* Refined 3-Zone Top Navbar */
+    .top-navbar {
+      height: 48px;
+      background: var(--bg-sidebar);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      user-select: none;
+      flex-shrink: 0;
+      z-index: 100;
+      gap: 16px;
+    }
+
+    .nav-zone-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .brand-badge-logo {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 3px;
+      border-radius: 8px;
+      background: transparent;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .brand-badge-logo:hover {
+      transform: scale(1.1);
+    }
+    .brand-badge-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 8px rgba(147, 51, 234, 0.4));
+      transition: filter 0.2s ease;
+    }
+    .brand-badge-logo:hover img {
+      filter: drop-shadow(0 4px 14px rgba(147, 51, 234, 0.65));
+    }
+
+    .brand-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: 6px;
+    }
+
+    .brand-name {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.3px;
+      white-space: nowrap;
+      line-height: 1;
+    }
+
+    .brand-version-pill {
+      font-family: var(--font-mono);
+      background: var(--accent-glow);
+      color: var(--border-focus);
+      border: 1px solid var(--border-focus);
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    .segmented-pill-nav {
+      display: flex;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .seg-nav-btn {
+      padding: 3px 9px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.12s ease;
+      font-family: inherit;
+    }
+
+    .seg-nav-btn:hover {
+      color: var(--text-main);
+    }
+
+    .seg-nav-btn.active {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border-color: var(--border-color);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Center Search Capsule */
+    .nav-zone-center {
+      flex: 1;
+      max-width: 440px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .top-search-capsule {
+      width: 100%;
+      height: 32px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .top-search-capsule:hover {
+      border-color: var(--border-focus);
+      background: var(--bg-card);
+    }
+
+    .search-lens-icon {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    .search-capsule-placeholder {
+      flex: 1;
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .search-kbd-pill {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Right Controls */
+    .nav-zone-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .env-chip-dropdown-wrap {
+      display: flex;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0 8px;
+      height: 30px;
+      gap: 6px;
+    }
+
+    .env-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+      flex-shrink: 0;
+    }
+
+    .env-chip-select {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-size: 11.5px;
+      font-weight: 500;
+      font-family: var(--font-mono);
+      outline: none;
+      cursor: pointer;
+      max-width: 170px;
+    }
+
+    .env-chip-select option {
+      background: var(--bg-card);
+      color: var(--text-main);
+    }
+
+    .nav-icon-btn {
+      height: 30px;
+      padding: 0 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 11.5px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+
+    .nav-icon-btn:hover {
+      border-color: var(--border-focus);
+      color: var(--text-main);
+    }
+
+    .nav-theme-select {
+      height: 30px;
+      padding: 0 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-main);
+      font-size: 11.5px;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .auth-pill-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(34, 197, 94, 0.12);
+      color: #86efac;
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      height: 24px;
+    }
+
+    /* Main Studio Container */
+    .studio-container {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 46px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Left Sidebar (Draggable / Resizable) */
+    .sidebar {
+      width: 320px;
+      min-width: 180px;
+      max-width: 700px;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      user-select: none;
+      position: relative;
+    }
+
+    .sidebar-search {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-search input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      outline: none;
+    }
+
+    .sidebar-search input:focus {
+      border-color: var(--border-focus);
+    }
+
+    .sidebar-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+
+    .tag-group {
+      margin-bottom: 6px;
+    }
+
+    .tag-header {
+      padding: 7px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 6px;
+      margin: 2px 8px;
+      transition: all 0.15s ease;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid transparent;
+    }
+
+    .tag-header:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .tag-header-left {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .tag-chevron {
+      font-size: 9px;
+      color: #6e7681;
+      display: inline-block;
+      width: 10px;
+      transition: transform 0.2s ease;
+    }
+
+    .tag-header.collapsed .tag-chevron {
+      transform: rotate(-90deg);
+    }
+
+    .tag-count-badge {
+      font-size: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 1px 6px;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .tag-items {
+      transition: all 0.2s ease;
+    }
+
+    .tag-items.collapsed {
+      display: none;
+    }
+
+    .endpoint-item {
+      padding: 7px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 12.5px;
+      transition: background 0.15s ease;
+      border-left: 3px solid transparent;
+    }
+
+    .endpoint-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .endpoint-item.active {
+      background: rgba(88, 166, 255, 0.1);
+      border-left-color: var(--border-focus);
+      color: #ffffff;
+    }
+
+    .method-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 10.5px;
+      min-width: 48px;
+      text-align: center;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+
+    .badge-get {
+      color: var(--method-get);
+    }
+
+    .badge-post {
+      color: var(--method-post);
+    }
+
+    .badge-put {
+      color: var(--method-put);
+    }
+
+    .badge-delete {
+      color: var(--method-delete);
+    }
+
+    .badge-patch {
+      color: var(--method-patch);
+    }
+
+    .endpoint-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    /* Draggable Splitters */
+    .resizer-v {
+      width: 6px;
+      background: transparent;
+      cursor: col-resize;
+      position: relative;
+      z-index: 50;
+      transition: background 0.15s ease;
+      user-select: none;
+      flex-shrink: 0;
+      margin-left: -3px;
+      margin-right: -3px;
+    }
+
+    .resizer-v:hover,
+    .resizer-v.dragging {
+      background: #58a6ff;
+      box-shadow: 0 0 10px rgba(88, 166, 255, 0.6);
+    }
+
+    .resizer-h {
+      height: 6px;
+      background: transparent;
+      cursor: row-resize;
+      position: relative;
+      z-index: 50;
+      transition: background 0.15s ease;
+      user-select: none;
+      flex-shrink: 0;
+      margin-top: -3px;
+      margin-bottom: -3px;
+    }
+
+    .resizer-h:hover,
+    .resizer-h.dragging {
+      background: #58a6ff;
+      box-shadow: 0 0 10px rgba(88, 166, 255, 0.6);
+    }
+
+    /* Right Main Panel */
+    .main-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-app);
+      overflow: hidden;
+    }
+
+    /* Request Bar */
+    .request-bar-container {
+      padding: 12px 20px 8px 20px;
+      background: var(--bg-sidebar);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .request-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .request-summary-title {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+        /* Monolithic Unified Request Bar */
+    .request-url-bar {
+      display: flex;
+      align-items: center;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .request-url-bar:focus-within {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .method-select {
+      background: var(--bg-card);
+      border: none;
+      border-right: 1px solid var(--border-color);
+      color: var(--method-post);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 13px;
+      padding: 10px 14px;
+      outline: none;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .method-select:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .url-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      padding: 10px 14px;
+      outline: none;
+    }
+
+    .url-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .btn-send {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      color: #ffffff;
+      border: none;
+      padding: 10px 22px;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      font-family: var(--font-sans);
+    }
+
+    .btn-send:hover {
+      background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+
+    /* Response Segmented Toolbar */
+    .response-view-segmented {
+      display: flex;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .response-view-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .response-view-btn:hover {
+      color: var(--text-main);
+    }
+
+    .response-view-btn.active {
+      background: var(--bg-card);
+      color: var(--border-focus);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+
+    /* Request Config Tabs Navigation */
+    .pm-tabs-bar {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 20px;
+      background: var(--bg-sidebar);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .pm-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12.5px;
+      font-weight: 500;
+      padding: 9px 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s ease;
+    }
+
+    .pm-tab:hover {
+      color: var(--text-main);
+    }
+
+    .pm-tab.active {
+      color: #58a6ff;
+      border-bottom-color: #58a6ff;
+      font-weight: 600;
+    }
+
+    .tab-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+    }
+
+    /* Body Type Selection Sub-bar */
+    .body-type-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 7px 20px;
+      background: var(--bg-app);
+      border-bottom: 1px solid var(--border-color);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .body-type-radio {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .body-type-radio.active {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .body-type-radio input {
+      accent-color: #58a6ff;
+    }
+
+    /* Split Workspace (Vertically Resizable) */
+    .workspace-split {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .request-body-section {
+      height: 280px;
+      min-height: 100px;
+      max-height: 80vh;
+      overflow-y: auto;
+      background: var(--bg-app);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Key-Value Grid Table */
+    .pm-grid-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .pm-grid-table th {
+      text-align: left;
+      padding: 8px 16px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .pm-grid-table td {
+      padding: 4px 16px;
+      border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+    }
+
+    .pm-grid-input {
+      width: 100%;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-main);
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      outline: none;
+    }
+
+    .pm-grid-input:focus {
+      background: var(--bg-input);
+      border-color: var(--border-focus);
+    }
+
+    .btn-row-action {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .btn-row-action:hover {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Raw JSON Editor */
+    .raw-json-editor {
+      flex: 1;
+      width: 100%;
+      background: var(--bg-input);
+      border: none;
+      color: #e2e8f0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      padding: 16px 20px;
+      outline: none;
+      resize: none;
+      line-height: 1.5;
+    }
+
+    /* Code Snippet Box */
+    .snippet-container {
+      padding: 16px 20px;
+      height: 100%;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .snippet-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .snippet-pre {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px 18px;
+      color: #f0f6fc;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      flex: 1;
+      overflow: auto;
+    }
+
+    /* =========================================================================
+       RESPONSE SECTION & FULLSCREEN ANALYZER TOOLBAR
+       ========================================================================= */
+    .response-section {
+      flex: 1;
+      min-height: 120px;
+      background: var(--bg-app);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .response-header-bar {
+      height: 42px;
+      background: var(--bg-sidebar);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      user-select: none;
+      gap: 12px;
+    }
+
+    .response-tabs-left {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .resp-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12.5px;
+      font-weight: 500;
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .resp-tab:hover {
+      color: var(--text-main);
+    }
+
+    .resp-tab.active {
+      color: #58a6ff;
+      border-bottom-color: #58a6ff;
+      font-weight: 600;
+    }
+
+    /* Upper-Right Corner Response Toolbar */
+    .response-tools-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .stat-badge-status {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      background: #166534;
+      color: #86efac;
+    }
+
+    .stat-badge-status.error {
+      background: #991b1b;
+      color: #fca5a5;
+    }
+
+    .stat-pill {
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+    }
+
+    .btn-resp-tool {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 4px 9px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 11.5px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-resp-tool:hover {
+      border-color: var(--border-focus);
+      color: #58a6ff;
+      background: rgba(88, 166, 255, 0.1);
+    }
+
+    .btn-resp-tool.active {
+      background: #2563eb;
+      border-color: #3b82f6;
+      color: #ffffff;
+    }
+
+    .btn-resp-tool-pinned {
+      background: #1e3a8a !important;
+      border-color: #3b82f6 !important;
+      color: #93c5fd !important;
+    }
+
+    .resp-search-input {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 11.5px;
+      outline: none;
+      width: 130px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .resp-search-input:focus {
+      border-color: var(--border-focus);
+      width: 170px;
+    }
+
+    .btn-sort-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 3px 6px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 500;
+      outline: none;
+      height: 26px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-sort-select:hover {
+      border-color: var(--border-focus);
+      color: #58a6ff;
+    }
+
+    .meta-date-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .meta-date-badge strong {
+      color: #93c5fd;
+      font-weight: 600;
+    }
+
+    .endpoint-date-badge {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-left: auto;
+      padding-left: 6px;
+      white-space: nowrap;
+      font-family: 'JetBrains Mono', monospace;
+      opacity: 0.85;
+    }
+
+    .endpoint-new-pill {
+      font-size: 9px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: #fff;
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-left: auto;
+      letter-spacing: 0.5px;
+    }
+
+    .latest-week-group {
+      margin-bottom: 8px;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      border-radius: 6px;
+      background: rgba(30, 58, 138, 0.12);
+      overflow: hidden;
+    }
+
+    .latest-week-header {
+      background: rgba(37, 99, 235, 0.18) !important;
+      border-bottom: 1px solid rgba(59, 130, 246, 0.25);
+    }
+
+    /* Response Subbar (for Diff Controls) */
+    .diff-subbar {
+      background: #111620;
+      border-bottom: 1px solid var(--border-color);
+      padding: 6px 16px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      gap: 12px;
+    }
+
+    .diff-subbar.active {
+      display: flex;
+    }
+
+    .diff-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 11.5px;
+      outline: none;
+    }
+
+    .diff-tag-add {
+      background: rgba(34, 197, 94, 0.15);
+      color: #86efac;
+      border: 1px solid #16a34a;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .diff-tag-del {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid #dc2626;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .diff-tag-mod {
+      background: rgba(234, 179, 8, 0.15);
+      color: #fde047;
+      border: 1px solid #ca8a04;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* Response Output Body */
+    .response-body-viewer {
+      flex: 1;
+      overflow: auto;
+      padding: 16px 20px;
+      background: #090d13;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* Tree View Styling */
+    .tree-node {
+      margin-left: 18px;
+    }
+
+    .tree-root {
+      margin-left: 0;
+    }
+
+    .tree-key {
+      color: var(--json-key);
+      font-weight: 500;
+    }
+
+    .tree-str {
+      color: var(--json-str);
+    }
+
+    .tree-num {
+      color: var(--json-num);
+    }
+
+    .tree-bool {
+      color: var(--json-bool);
+    }
+
+    .tree-null {
+      color: var(--json-null);
+      font-style: italic;
+    }
+
+    .tree-toggle {
+      display: inline-block;
+      width: 14px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      color: #64748b;
+      margin-right: 4px;
+      font-size: 11px;
+      transition: transform 0.15s ease;
+    }
+
+    .tree-toggle:hover {
+      color: #60a5fa;
+    }
+
+    .tree-toggle.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    .tree-badge {
+      font-size: 10.5px;
+      color: #64748b;
+      background: #161b22;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      border: 1px solid #30363d;
+    }
+
+    .tree-highlight {
+      background: rgba(234, 179, 8, 0.35);
+      color: #fef08a;
+      padding: 1px 3px;
+      border-radius: 3px;
+    }
+
+    /* Diff View Styling */
+    .diff-container {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .diff-side-by-side {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      height: 100%;
+    }
+
+    .diff-pane {
+      background: #0d1117;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      overflow: auto;
+    }
+
+    .diff-pane-title {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .diff-line {
+      display: flex;
+      align-items: baseline;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin: 1px 0;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .diff-line.added {
+      background: rgba(34, 197, 94, 0.16);
+      color: #86efac;
+      border-left: 3px solid #22c55e;
+    }
+
+    .diff-line.removed {
+      background: rgba(239, 68, 68, 0.16);
+      color: #fca5a5;
+      border-left: 3px solid #ef4444;
+      text-decoration: line-through;
+    }
+
+    .diff-line.modified {
+      background: rgba(234, 179, 8, 0.16);
+      color: #fef08a;
+      border-left: 3px solid #eab308;
+    }
+
+    .diff-line.unchanged {
+      color: var(--text-muted);
+    }
+
+    /* Fullscreen Modal Window */
+    .json-modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(9, 13, 19, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .json-modal-backdrop.open {
+      display: flex;
+      opacity: 1;
+    }
+
+    .json-modal-window {
+      background: #0d1117;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      width: 94vw;
+      max-width: 1400px;
+      height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+    }
+
+    .modal-footer {
+      background: var(--bg-sidebar);
+      padding: 8px 16px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    /* Toast Message */
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #10b981;
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+      z-index: 10000;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+    }
+
+    .toast-msg.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Top Navigation Header (Refined 3-Zone Balanced Layout) -->
+  <header class="top-navbar">
+    <!-- ZONE 1: Left Brand & Workspace Navigation -->
+    <div class="nav-zone-left">
+      <div class="brand-badge-logo">
+        <img id="brand-logo-img" src="magicapi-logo.png" alt="MagicAPI" />
+      </div>
+      <div class="brand-title-wrap">
+        <span class="brand-name">MagicAPI</span>
+        <span class="brand-version-pill">v2.1</span>
+      </div>
+
+      <!-- Segmented Nav Switcher: Documentation / API Studio -->
+      <div class="segmented-pill-nav">
+        <a href="/docs" class="seg-nav-btn">📖 Docs</a>
+        <a href="/api" class="seg-nav-btn active">⚡ Studio</a>
+      </div>
+
+      <!-- Segmented View Mode: Focus vs Multi-Tab -->
+      <div class="segmented-pill-nav">
+        <button id="btn-view-single" class="seg-nav-btn active" onclick="setTabMode(false)" title="Focused Single-API Mode">
+          🎯 Focus
+        </button>
+        <button id="btn-view-tabs" class="seg-nav-btn" onclick="setTabMode(true)" title="Multi-Tab Workspace Mode">
+          📑 Tabs
+        </button>
+      </div>
+    </div>
+
+    <!-- ZONE 2: Center Global Search & Command Bar -->
+    <div class="nav-zone-center">
+      <div class="top-search-capsule" onclick="openCmdPalette()" title="Press ⌘K or Ctrl+K">
+        <span class="search-lens-icon">🔍</span>
+        <span class="search-capsule-placeholder">Search endpoints, models, parameters...</span>
+        <kbd class="search-kbd-pill">⌘K</kbd>
+      </div>
+    </div>
+
+    <!-- ZONE 3: Right Environment, Variables, Theme & Auth Status -->
+    <div class="nav-zone-right">
+      <!-- Target Environment Dropdown -->
+      <div class="env-chip-dropdown-wrap">
+        <span class="env-status-dot"></span>
+        <select id="env-select" class="env-chip-select" title="Target Server Environment">
+          <option value="https://api.magicapi.dev/v1">Production (/v1)</option>
+          <option value="http://localhost:8000/v1" selected>Local (localhost:8000/v1)</option>
+          <option value="http://192.168.1.20:8000/v1">Staging (/v1)</option>
+        </select>
+      </div>
+
+      <!-- Variables Modal Trigger Icon Button -->
+      <button class="nav-icon-btn" onclick="openVariablesModal()" title="Dynamic Variables & Environment Manager ({{var}})">
+        <span>🌐</span>
+        <span>Vars</span>
+      </button>
+
+      <!-- Theme Switcher Dropdown -->
+      <select id="theme-select" class="nav-theme-select" onchange="switchTheme(this.value)" title="Theme Palette">
+        <option value="dark">🌙 Dark</option>
+        <option value="midnight">🌌 Midnight</option>
+        <option value="cyberpunk">👾 Neon</option>
+        <option value="light">☀️ Light</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Studio Main Workspace -->
+  <div class="studio-container">
+    <!-- Left Sidebar (Draggable / Resizable) -->
+    <aside class="sidebar" id="sidebar-panel">
+      <!-- 1. Sidebar Segmented Nav (Endpoints, History, Saved Collections) -->
+      <div class="sidebar-tabs-nav">
+        <button class="sidebar-nav-btn active" id="btn-nav-endpoints" onclick="switchSidebarTab('endpoints')">
+          📂 Endpoints
+        </button>
+        <button class="sidebar-nav-btn" id="btn-nav-history" onclick="switchSidebarTab('history')">
+          🕒 History <span class="nav-count-badge" id="history-count-badge">0</span>
+        </button>
+        <button class="sidebar-nav-btn" id="btn-nav-collections" onclick="switchSidebarTab('collections')">
+          🔖 Collections
+        </button>
+      </div>
+
+      <!-- 2. Endpoints View Panel -->
+      <div id="panel-endpoints" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
+        <div class="sidebar-search" style="display:flex; align-items:center; gap:6px;">
+          <input type="text" id="endpoint-filter" placeholder="Filter endpoints..." style="flex:1; min-width:0;" />
+          <select id="endpoint-sort" class="btn-sort-select" title="Sort APIs (Newest, Recently Updated, or Alphabetical)">
+            <option value="default">⏱️ Sort: Default</option>
+            <option value="latest">✨ Latest Created</option>
+            <option value="updated">🔄 Recently Updated</option>
+            <option value="alpha">🔤 Name (A-Z)</option>
+          </select>
+          <button id="btn-toggle-all-tags" class="btn-resp-tool"
+            style="padding:4px 8px; font-size:11px; white-space:nowrap; height:26px;" title="Expand / Collapse All Sections">Fold All</button>
+        </div>
+        <div class="sidebar-list" id="sidebar-endpoints">
+          <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 12px;">Loading endpoints...</div>
+        </div>
+      </div>
+
+      <!-- 3. History View Panel -->
+      <div id="panel-history" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+        <div style="padding:8px 12px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); background:var(--bg-input);">
+          <span style="font-size:11px; font-weight:700; color:var(--text-muted);">RECENT REQUESTS</span>
+          <button onclick="clearHistoryLog()" class="btn-resp-tool" style="padding:2px 6px; font-size:10px;">Clear All</button>
+        </div>
+        <div class="sidebar-list" id="history-items-list">
+          <div style="padding:24px; text-align:center; color:var(--text-dim); font-size:12px;">No recent requests sent yet.</div>
+        </div>
+      </div>
+
+      <!-- 4. Collections View Panel -->
+      <div id="panel-collections" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+        <div style="padding:8px 12px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); background:var(--bg-input);">
+          <span style="font-size:11px; font-weight:700; color:var(--text-muted);">BOOKMARKS & PRESETS</span>
+          <button onclick="saveCurrentToCollection()" class="btn-resp-tool" style="padding:2px 6px; font-size:10px;">+ Save Tab</button>
+        </div>
+        <div class="sidebar-list" id="collections-items-list">
+          <div style="padding:24px; text-align:center; color:var(--text-dim); font-size:12px;">No saved bookmarks. Click "+ Save Tab" to save a request preset.</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Vertical Splitter for Sidebar Resizing -->
+    <div class="resizer-v" id="sidebar-resizer" title="Drag left/right to resize sidebar"></div>
+
+    <!-- Right Main Panel: Postman Request Setup & Response -->
+    <main class="main-panel">
+      <!-- Postman-Style Multi-Tab Workspace Header Bar -->
+      <div class="workspace-tabs-bar" id="workspace-tabs-bar">
+        <div class="workspace-tabs-list" id="workspace-tabs-list"></div>
+        <div style="display:flex; align-items:center; gap:4px; padding-right:6px;">
+          <button class="btn-tab-action" onclick="createNewWorkspaceTab()" title="Open new blank tab (+)">+</button>
+          <button class="btn-view-mode-pill active" id="btn-tab-view-toggle" onclick="toggleTabModeUI()" title="Toggle Tabbed View Mode">📑 Multi-Tab</button>
+        </div>
+      </div>
+
+      <!-- Request Bar -->
+      <div class="request-bar-container">
+        <div class="request-meta-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <h2 id="active-endpoint-title" class="request-summary-title">Select an endpoint from the sidebar</h2>
+          <div id="endpoint-meta-badges" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;"></div>
+        </div>
+        <div class="request-url-bar">
+          <select id="request-method" class="method-select">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+            <option value="PATCH">PATCH</option>
+          </select>
+          <input type="text" id="request-url" class="url-input" placeholder="http://localhost:8000/v1/..." />
+          <select id="engine-mode-select" class="btn-sort-select" onchange="toggleEngineMode(this.value)" style="height:100%; border:none; border-left:1px solid var(--border-color); border-radius:0; padding:0 8px; font-size:11.5px; background:var(--bg-card);" title="Select Live Network or Mock Simulation">
+            <option value="live">🌐 Live</option>
+            <option value="mock">🎲 Mock</option>
+          </select>
+          <select id="mock-status-select" class="btn-sort-select" style="height:100%; border:none; border-left:1px solid var(--border-color); border-radius:0; padding:0 6px; font-size:11.5px; background:var(--bg-card); display:none;" title="Select Mock HTTP Status Code">
+            <option value="200">200 OK</option>
+            <option value="201">201 Created</option>
+            <option value="400">400 Bad</option>
+            <option value="401">401 Auth</option>
+            <option value="500">500 Err</option>
+          </select>
+          <button id="btn-send-request" class="btn-send">Send</button>
+        </div>
+      </div>
+
+      <!-- Request Navigation Tabs -->
+      <div class="pm-tabs-bar">
+        <button class="pm-tab active" data-req-tab="params">Params <span class="tab-dot" id="dot-params"
+            style="display:none;"></span></button>
+        <button class="pm-tab" data-req-tab="auth">Authorization</button>
+        <button class="pm-tab" data-req-tab="headers">Headers <span id="badge-headers"
+            style="font-size:11px; opacity:0.7;">(3)</span></button>
+        <button class="pm-tab" data-req-tab="body">Body <span class="tab-dot" id="dot-body"
+            style="display:inline-block;"></span></button>
+        <button class="pm-tab" data-req-tab="code">Code Snippet</button>
+      </div>
+
+      <!-- Body Type Selection Sub-bar -->
+      <div id="body-type-bar" class="body-type-bar">
+        <label class="body-type-radio" data-type="none"><input type="radio" name="bodyType" value="none"> none</label>
+        <label class="body-type-radio active" data-type="form-data"><input type="radio" name="bodyType"
+            value="form-data" checked> form-data</label>
+        <label class="body-type-radio" data-type="x-www-form-urlencoded"><input type="radio" name="bodyType"
+            value="x-www-form-urlencoded"> x-www-form-urlencoded</label>
+        <label class="body-type-radio" data-type="raw"><input type="radio" name="bodyType" value="raw"> raw
+          (JSON)</label>
+      </div>
+
+      <!-- Split Workspace (Vertically Resizable) -->
+      <div class="workspace-split">
+        <!-- Request Config Area -->
+        <div class="request-body-section" id="req-config-area">
+          <!-- Params Tab View -->
+          <div id="view-params" style="display:none; padding:12px 0;">
+            <table class="pm-grid-table" id="table-params">
+              <thead>
+                <tr>
+                  <th style="width: 30%;">Key</th>
+                  <th style="width: 40%;">Value</th>
+                  <th style="width: 25%;">Description</th>
+                  <th style="width: 5%;"></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-params"></tbody>
+            </table>
+            <button id="btn-add-param" class="btn-resp-tool" style="margin: 10px 16px;">+ Add Param</button>
+          </div>
+
+          <!-- Auth Tab View -->
+          <div id="view-auth" style="display:none; padding:20px;">
+            <div
+              style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; padding:16px; max-width:600px;">
+              <h4 style="margin-bottom:8px; font-size:14px; color:#58a6ff;">🛡️ Inherited Cookie-based Session</h4>
+              <p style="font-size:12.5px; color:var(--text-muted); line-height:1.5;">
+                All requests automatically include your active HTTP-only session cookies (<code>adminAccessToken</code>,
+                <code>clientAccessToken</code>) and <code>csrf_token</code> header.
+              </p>
+            </div>
+          </div>
+
+          <!-- Headers Tab View -->
+          <div id="view-headers" style="display:none; padding:12px 0;">
+            <table class="pm-grid-table">
+              <thead>
+                <tr>
+                  <th style="width: 35%;">Header</th>
+                  <th style="width: 60%;">Value</th>
+                  <th style="width: 5%;"></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-headers">
+                <tr>
+                  <td><input class="pm-grid-input" value="Accept" readonly></td>
+                  <td><input class="pm-grid-input" value="*/*" id="hdr-accept"></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td><input class="pm-grid-input" value="Content-Type" readonly></td>
+                  <td><input class="pm-grid-input" value="application/json" id="hdr-content-type"></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td><input class="pm-grid-input" value="X-CSRF-Token" readonly></td>
+                  <td><input class="pm-grid-input" value="(Auto-injected from cookie)" id="hdr-csrf" readonly></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Body Tab View -->
+          <div id="view-body" style="display:flex; flex:1; flex-direction:column; height:100%;">
+            <div id="body-form-data-view" style="flex:1; overflow:auto;">
+              <table class="pm-grid-table" id="table-body-form">
+                <thead>
+                  <tr>
+                    <th style="width: 25%;">Key</th>
+                    <th style="width: 12%;">Type</th>
+                    <th style="width: 36%;">Value / File</th>
+                    <th style="width: 22%;">Description</th>
+                    <th style="width: 5%;"></th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-body-form"></tbody>
+              </table>
+              <button id="btn-add-body-field" class="btn-resp-tool" style="margin: 10px 16px;">+ Add Field</button>
+            </div>
+            <textarea id="body-raw-editor" class="raw-json-editor" style="display:none;"
+              placeholder='{\n  "key": "value"\n}'></textarea>
+          </div>
+
+          <!-- Code Snippet View -->
+          <div id="view-code" class="snippet-container" style="display:none;">
+            <div class="snippet-toolbar">
+              <span style="font-size:12.5px; color:var(--text-muted);">Generated Code Snippet:</span>
+              <div style="display:flex; gap:8px;">
+                <select id="code-lang-select" class="env-picker">
+                  <option value="curl">cURL</option>
+                  <option value="fetch">JavaScript (Fetch)</option>
+                  <option value="python">Python (Requests)</option>
+                  <option value="go">Go (net/http)</option>
+                </select>
+                <button id="btn-copy-snippet" class="btn-resp-tool">📋 Copy</button>
+              </div>
+            </div>
+            <pre id="code-snippet-pre" class="snippet-pre"></pre>
+          </div>
+        </div>
+
+        <!-- Horizontal Splitter for Request/Response Resizing -->
+        <div class="resizer-h" id="workspace-resizer" title="Drag up/down to resize request/response panels"></div>
+
+        <!-- =========================================================================
+             RESPONSE SECTION WITH FULL UPPER-RIGHT TOOLBAR
+             ========================================================================= -->
+        <div class="response-section">
+          <div class="response-header-bar">
+            <!-- Left Tabs -->
+            <div class="response-tabs-left">
+              <button class="resp-tab active" data-resp-tab="body">Body</button>
+              <button class="resp-tab" data-resp-tab="cookies">Cookies</button>
+              <button class="resp-tab" data-resp-tab="headers">Headers</button>
+            </div>
+
+            <!-- Upper-Right Corner Action & Feature Buttons -->
+            <div class="response-tools-right">
+              <span id="resp-status-badge" class="stat-badge-status" style="display:none;">200 OK</span>
+              <span id="resp-time-badge" class="stat-pill" style="display:none;">⏱️ 0 ms</span>
+              <span id="resp-size-badge" class="stat-pill" style="display:none;">📦 0 B</span>
+
+              <input type="text" id="resp-search-input" class="resp-search-input" placeholder="🔍 Search keys..." />
+
+              <button id="btn-resp-tree" class="btn-resp-tool" title="Interactive Tree View">🌳 Tree</button>
+              <button id="btn-resp-raw" class="btn-resp-tool active" title="Formatted Raw JSON">📄 Raw</button>
+              <button id="btn-resp-diff" class="btn-resp-tool" title="Response Difference (Diff) Viewer">🔀
+                Diff</button>
+              <button id="btn-resp-pin" class="btn-resp-tool" title="Pin current response as comparison baseline">📌
+                Pin</button>
+              <button id="btn-resp-copy" class="btn-resp-tool" title="Copy Response">📋</button>
+              <button id="btn-resp-save" class="btn-resp-tool" title="Save JSON file">💾</button>
+              <button id="btn-resp-fullscreen" class="btn-resp-tool" title="Open Fullscreen Analyzer">⛶
+                Fullscreen</button>
+            </div>
+          </div>
+
+          <!-- Diff Controls Subbar -->
+          <div id="resp-diff-subbar" class="diff-subbar">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="color:var(--text-muted);">Compare against:</span>
+              <select id="diff-target-select" class="diff-select">
+                <option value="pinned">📌 Pinned Baseline</option>
+                <option value="previous">⏪ Previous Call for this Endpoint</option>
+                <option value="custom">📝 Paste Custom JSON...</option>
+              </select>
+              <button id="btn-diff-layout" class="btn-resp-tool" style="padding: 2px 7px; font-size:11px;">Toggle Split
+                / Unified</button>
+            </div>
+            <div id="diff-metrics" style="display:flex; gap:8px;">
+              <span class="diff-tag-add" id="metric-added">+0 Added</span>
+              <span class="diff-tag-del" id="metric-removed">-0 Removed</span>
+              <span class="diff-tag-mod" id="metric-modified">~0 Modified</span>
+            </div>
+          </div>
+
+          <!-- Response Body Content Viewer -->
+          <div id="response-output" class="response-body-viewer">
+            <div style="color: var(--text-dim); padding: 40px 0; text-align: center;">
+              Hit <strong>Send</strong> to execute the API request and view the real-time response.
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- =========================================================================
+       FULLSCREEN MODAL WITH FULL FEATURE TOOLBAR (TREE, RAW, DIFF, PIN, SEARCH)
+       ========================================================================= -->
+  <div id="json-modal" class="json-modal-backdrop">
+    <div class="json-modal-window">
+      <!-- Modal Header Toolbar -->
+      <div class="response-header-bar" style="border-radius: 12px 12px 0 0; padding: 0 16px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span id="modal-status-badge" class="stat-badge-status">200 OK</span>
+          <h3 id="modal-title" style="font-size:13.5px; font-weight:600; color:#f0f6fc;">Fullscreen Response Analyzer
+          </h3>
+        </div>
+
+        <div class="response-tools-right">
+          <input type="text" id="modal-search-input" class="resp-search-input" placeholder="🔍 Search keys..."
+            style="width:160px;" />
+
+          <button id="modal-btn-tree" class="btn-resp-tool" title="Interactive Tree View">🌳 Tree</button>
+          <button id="modal-btn-raw" class="btn-resp-tool active" title="Formatted Raw JSON">📄 Raw</button>
+          <button id="modal-btn-diff" class="btn-resp-tool" title="Response Difference (Diff) Viewer">🔀 Diff</button>
+          <button id="modal-btn-pin" class="btn-resp-tool" title="Pin current response as baseline">📌 Pin</button>
+          <button id="modal-btn-copy" class="btn-resp-tool" title="Copy Response">📋 Copy</button>
+          <button id="modal-btn-save" class="btn-resp-tool" title="Save JSON file">💾 Save</button>
+          <button id="btn-close-modal" class="btn-resp-tool"
+            style="background:#ef4444; color:#fff; border:none; padding:4px 10px;">✕ Close</button>
+        </div>
+      </div>
+
+      <!-- Modal Diff Subbar -->
+      <div id="modal-diff-subbar" class="diff-subbar">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="color:var(--text-muted);">Compare against:</span>
+          <select id="modal-diff-target-select" class="diff-select">
+            <option value="pinned">📌 Pinned Baseline</option>
+            <option value="previous">⏪ Previous Call for this Endpoint</option>
+            <option value="custom">📝 Paste Custom JSON...</option>
+          </select>
+          <button id="modal-btn-diff-layout" class="btn-resp-tool" style="padding: 2px 7px; font-size:11px;">Toggle
+            Split / Unified</button>
+        </div>
+        <div id="modal-diff-metrics" style="display:flex; gap:8px;">
+          <span class="diff-tag-add" id="modal-metric-added">+0 Added</span>
+          <span class="diff-tag-del" id="modal-metric-removed">-0 Removed</span>
+          <span class="diff-tag-mod" id="modal-metric-modified">~0 Modified</span>
+        </div>
+      </div>
+
+      <!-- Modal Content Body -->
+      <div id="modal-content" class="response-body-viewer" style="flex:1;"></div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <div style="display:flex; gap:16px;">
+          <span>Size: <strong id="modal-stat-size" style="color:#f0f6fc;">0 KB</strong></span>
+          <span>Keys: <strong id="modal-stat-keys" style="color:#f0f6fc;">0</strong></span>
+          <span>Pinned Baseline: <strong id="modal-stat-pinned" style="color:#f0f6fc;">None</strong></span>
+        </div>
+        <div>Press <kbd style="background:#30363d; padding:2px 6px; border-radius:4px; color:#fff;">ESC</kbd> to exit
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast-msg">Copied to clipboard!</div>
+
+  <!-- Command Palette Modal (⌘K) -->
+  <div class="cmd-overlay" id="cmd-overlay" onclick="closeCmdPalette(event)">
+    <div class="cmd-palette-box" onclick="event.stopPropagation()">
+      <div class="cmd-search-wrap">
+        <span>🔍</span>
+        <input type="text" id="cmd-search-input" placeholder="Type a command or search endpoints... (↑ ↓ Enter)" oninput="filterCmdPalette()" />
+        <kbd style="font-family:'JetBrains Mono',monospace; font-size:10px; background:var(--bg-card); padding:1px 5px; border-radius:4px; border:1px solid var(--border-color); color:var(--text-muted);">ESC</kbd>
+      </div>
+      <div class="cmd-results-list" id="cmd-results-list"></div>
+    </div>
+  </div>
+
+  <!-- Dynamic Variables & Environment Modal -->
+  <div class="cmd-overlay" id="var-modal-overlay" onclick="closeVariablesModal(event)">
+    <div class="cmd-palette-box" style="max-width:680px;" onclick="event.stopPropagation()">
+      <div style="padding:12px 18px; background:var(--bg-card); border-bottom:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between;">
+        <h3 style="font-size:14px; font-weight:700; color:var(--text-main);">🌐 Dynamic Environment Variables</h3>
+        <button class="btn-resp-tool" onclick="closeVariablesModal()">✕</button>
+      </div>
+      <div style="padding:16px; max-height:60vh; overflow-y:auto;">
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px; line-height:1.5;">
+          Use <code>{{variableName}}</code> in your URLs, headers, and request bodies. Dynamic generators like <code>{{$uuid}}</code>, <code>{{$timestamp}}</code>, and <code>{{$randomEmail}}</code> are automatically generated.
+        </p>
+        <table class="pm-grid-table" style="margin-bottom:14px;">
+          <thead>
+            <tr>
+              <th style="width:40%;">Variable Name</th>
+              <th style="width:50%;">Value</th>
+              <th style="width:10%;"></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-custom-vars"></tbody>
+        </table>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <button class="btn-resp-tool" onclick="addCustomVarRow()">+ Add Variable</button>
+          <button class="btn-resp-tool" style="background:var(--primary); color:#fff;" onclick="saveCustomVars()">Save Variables</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+
+    // =========================================================================
+    // MULTI-TAB WORKSPACE, HISTORY, COLLECTIONS & VARIABLES ENGINE
+    // =========================================================================
+    let isTabModeEnabled = true;
+    let workspaceTabs = [];
+    let activeWorkspaceTabId = null;
+
+    let requestHistoryLog = [];
+    let savedCollectionsMap = {};
+
+    let customVariables = {
+      baseUrl: "http://localhost:8000/v1",
+      token: "",
+      clientId: "client_demo_123"
+    };
+
+    try {
+      const savedTabMode = localStorage.getItem("openapi_tab_mode_enabled");
+      if (savedTabMode !== null) isTabModeEnabled = savedTabMode === "true";
+
+      const savedVars = localStorage.getItem("openapi_custom_vars");
+      if (savedVars) customVariables = Object.assign(customVariables, JSON.parse(savedVars));
+
+      const hist = localStorage.getItem("openapi_req_history_log");
+      if (hist) requestHistoryLog = JSON.parse(hist);
+
+      const cols = localStorage.getItem("openapi_saved_collections_map");
+      if (cols) savedCollectionsMap = JSON.parse(cols);
+
+      const savedTheme = localStorage.getItem("openapi_theme") || "dark";
+      switchTheme(savedTheme, false);
+    } catch (e) { }
+
+    function switchTheme(theme, save = true) {
+      document.documentElement.setAttribute("data-theme", theme);
+      const sel = document.getElementById("theme-select");
+      if (sel) sel.value = theme;
+      const logoImg = document.getElementById("brand-logo-img");
+      if (logoImg) logoImg.src = theme === "light" ? "magicapi-logo-light.png" : "magicapi-logo.png";
+      if (save) localStorage.setItem("openapi_theme", theme);
+    }
+
+    function interpolateVariables(text) {
+      if (typeof text !== "string") return text;
+      return text.replace(/\{\{([a-zA-Z0-9_$.]+)\}\}/g, (match, key) => {
+        if (key === "$uuid") return crypto.randomUUID ? crypto.randomUUID() : 'id_' + Math.random().toString(36).substring(2, 9);
+        if (key === "$timestamp") return Date.now().toString();
+        if (key === "$isoTimestamp") return new Date().toISOString();
+        if (key === "$randomEmail") return `user_${Math.floor(Math.random() * 89999 + 10000)}@example.com`;
+        if (key === "$randomInt") return Math.floor(Math.random() * 1000 + 1).toString();
+        if (key in customVariables) return customVariables[key];
+        return match;
+      });
+    }
+
+    // Sidebar View Switcher (Endpoints, History, Collections)
+    function switchSidebarTab(tabName) {
+      document.getElementById("btn-nav-endpoints")?.classList.toggle("active", tabName === "endpoints");
+      document.getElementById("btn-nav-history")?.classList.toggle("active", tabName === "history");
+      document.getElementById("btn-nav-collections")?.classList.toggle("active", tabName === "collections");
+
+      document.getElementById("panel-endpoints").style.display = tabName === "endpoints" ? "flex" : "none";
+      document.getElementById("panel-history").style.display = tabName === "history" ? "flex" : "none";
+      document.getElementById("panel-collections").style.display = tabName === "collections" ? "flex" : "none";
+    }
+
+    function updateHistoryUI() {
+      const listEl = document.getElementById("history-items-list");
+      const badgeEl = document.getElementById("history-count-badge");
+      if (badgeEl) badgeEl.innerText = requestHistoryLog.length;
+      if (!listEl) return;
+
+      if (requestHistoryLog.length === 0) {
+        listEl.innerHTML = `<div style="padding:24px; text-align:center; color:var(--text-dim); font-size:12px;">No recent requests sent yet.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = requestHistoryLog.map(h => `
+        <div class="hist-item-row" onclick="replayHistoryItem('${h.method}', '${h.url}')">
+          <div class="hist-top-row">
+            <span class="method-badge badge-${h.method.toLowerCase()}">${h.method}</span>
+            <span class="hist-status-pill ${h.status.startsWith('2') ? 'hist-status-2xx' : 'hist-status-4xx'}">${h.status}</span>
+            <span style="font-size:10.5px; color:var(--text-dim); font-family:'JetBrains Mono',monospace;">${h.duration}ms</span>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            ${h.url}
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function replayHistoryItem(method, url) {
+      createNewWorkspaceTab(method, "", url);
+      document.getElementById("request-method").value = method;
+      document.getElementById("request-url").value = url;
+    }
+
+    function clearHistoryLog() {
+      requestHistoryLog = [];
+      localStorage.removeItem("openapi_req_history_log");
+      updateHistoryUI();
+      showToast("Request history cleared");
+    }
+
+    function saveCurrentToCollection() {
+      const name = prompt("Enter a label for this saved request:");
+      if (!name) return;
+      const curTab = workspaceTabs.find(t => t.id === activeWorkspaceTabId);
+      const method = curTab ? curTab.method : document.getElementById("request-method").value;
+      const url = curTab ? curTab.url : document.getElementById("request-url").value;
+
+      if (!savedCollectionsMap["Default"]) savedCollectionsMap["Default"] = [];
+      savedCollectionsMap["Default"].push({ id: "col_" + Date.now(), name, method, url });
+      localStorage.setItem("openapi_saved_collections_map", JSON.stringify(savedCollectionsMap));
+      updateCollectionsUI();
+      showToast(`Saved "${name}" to Collections!`);
+    }
+
+    function updateCollectionsUI() {
+      const listEl = document.getElementById("collections-items-list");
+      if (!listEl) return;
+
+      const items = savedCollectionsMap["Default"] || [];
+      if (items.length === 0) {
+        listEl.innerHTML = `<div style="padding:24px; text-align:center; color:var(--text-dim); font-size:12px;">No saved bookmarks. Click "+ Save Tab" to save a request preset.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = items.map(c => `
+        <div class="hist-item-row" onclick="replayHistoryItem('${c.method}', '${c.url}')">
+          <div style="font-weight:600; font-size:12px; color:var(--text-main);">${c.name}</div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span class="method-badge badge-${c.method.toLowerCase()}">${c.method}</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${c.url}</span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    // Layout View Mode Engine (🎯 Focus vs 📑 Multi-Tab)
+    function setTabMode(enabled) {
+      isTabModeEnabled = enabled;
+      localStorage.setItem("openapi_tab_mode_enabled", isTabModeEnabled ? "true" : "false");
+      
+      const btnSingle = document.getElementById("btn-view-single");
+      const btnTabs = document.getElementById("btn-view-tabs");
+      const tabBar = document.getElementById("workspace-tabs-bar");
+
+      if (btnSingle) btnSingle.classList.toggle("active", !isTabModeEnabled);
+      if (btnTabs) btnTabs.classList.toggle("active", isTabModeEnabled);
+      if (tabBar) tabBar.style.display = isTabModeEnabled ? "flex" : "none";
+
+      if (isTabModeEnabled) {
+        if (workspaceTabs.length === 0 && activeEndpoint) {
+          createNewWorkspaceTab(activeEndpoint.method, activeEndpoint.path, activeEndpoint.op.summary || activeEndpoint.path);
+        } else if (workspaceTabs.length === 0) {
+          createNewWorkspaceTab("GET", "/health", "Health Check");
+        }
+        renderWorkspaceTabsUI();
+      }
+    }
+
+    function toggleTabsFeature() {
+      setTabMode(!isTabModeEnabled);
+    }
+
+    function toggleTabModeUI() {
+      toggleTabsFeature();
+    }
+
+    function createNewWorkspaceTab(method = "GET", path = "", title = "New Request") {
+      const tabId = "tab_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6);
+      const newTab = {
+        id: tabId,
+        method: method.toUpperCase(),
+        path: path,
+        title: title || path || "Request",
+        url: path ? (document.getElementById("request-url")?.value || path) : "http://localhost:8000/v1/",
+        isDirty: false
+      };
+      workspaceTabs.push(newTab);
+      switchWorkspaceTab(tabId);
+    }
+
+    function switchWorkspaceTab(tabId) {
+      activeWorkspaceTabId = tabId;
+      const tab = workspaceTabs.find(t => t.id === tabId);
+      if (!tab) return;
+
+      if (tab.method && tab.path && specData && specData.paths && specData.paths[tab.path]) {
+        selectEndpoint(tab.method, tab.path, false);
+      } else {
+        document.getElementById("request-method").value = tab.method;
+        if (tab.url) document.getElementById("request-url").value = tab.url;
+        document.getElementById("active-endpoint-title").innerText = tab.title;
+      }
+      renderWorkspaceTabsUI();
+    }
+
+    function closeWorkspaceTab(e, tabId) {
+      e.stopPropagation();
+      workspaceTabs = workspaceTabs.filter(t => t.id !== tabId);
+      if (workspaceTabs.length === 0) {
+        createNewWorkspaceTab();
+      } else if (activeWorkspaceTabId === tabId) {
+        switchWorkspaceTab(workspaceTabs[workspaceTabs.length - 1].id);
+      } else {
+        renderWorkspaceTabsUI();
+      }
+    }
+
+    function renderWorkspaceTabsUI() {
+      const listEl = document.getElementById("workspace-tabs-list");
+      if (!listEl) return;
+
+      listEl.innerHTML = workspaceTabs.map(t => `
+        <div class="workspace-tab ${t.id === activeWorkspaceTabId ? 'active' : ''} ${t.isDirty ? 'dirty' : ''}" onclick="switchWorkspaceTab('${t.id}')">
+          <span class="method-badge badge-${t.method.toLowerCase()}" style="font-size:9px; min-width:unset; padding:1px 3px;">${t.method}</span>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:130px;">${t.title || t.path || 'Request'}</span>
+          <span class="workspace-tab-dirty"></span>
+          <span class="workspace-tab-close" onclick="closeWorkspaceTab(event, '${t.id}')">✕</span>
+        </div>
+      `).join("");
+    }
+
+    // Dynamic Mock Engine Synthesizer
+    function toggleEngineMode(mode) {
+      const mockStatusSel = document.getElementById("mock-status-select");
+      const btn = document.getElementById("btn-send-request");
+      if (mode === "mock") {
+        mockStatusSel.style.display = "inline-block";
+        btn.innerText = "🎲 Mock Send";
+        btn.style.background = "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)";
+      } else {
+        mockStatusSel.style.display = "none";
+        btn.innerText = "Send";
+        btn.style.background = "";
+      }
+    }
+
+    function synthesizeMockResponse(schema) {
+      if (!schema) return { success: true, message: "OK" };
+      if (schema.$ref && specData && specData.components && specData.components.schemas) {
+        const refName = schema.$ref.split("/").pop();
+        if (specData.components.schemas[refName]) return synthesizeMockResponse(specData.components.schemas[refName]);
+      }
+      if (schema.example !== undefined) return schema.example;
+      if (schema.enum && schema.enum.length > 0) return schema.enum[0];
+
+      const type = schema.type || (schema.properties ? "object" : "string");
+      if (type === "object") {
+        const obj = {};
+        const props = schema.properties || {};
+        for (const k in props) obj[k] = synthesizeMockResponse(props[k]);
+        return obj;
+      }
+      if (type === "array") {
+        const itemSchema = schema.items || {};
+        return [synthesizeMockResponse(itemSchema), synthesizeMockResponse(itemSchema)];
+      }
+      if (type === "string") {
+        if (schema.format === "email") return "developer@magicapi.dev";
+        if (schema.format === "uuid") return "c8a4b3e2-5a6b-4e12-9c3f-7e8a9b0c1d2e";
+        if (schema.format === "date-time") return new Date().toISOString();
+        if (schema.format === "uri") return "https://api.magicapi.dev";
+        return "sample_" + (schema.title || "string");
+      }
+      if (type === "integer" || type === "number") return schema.minimum !== undefined ? schema.minimum : 100;
+      if (type === "boolean") return true;
+      return null;
+    }
+
+    // Command Palette (⌘K)
+    function openCmdPalette() {
+      const overlay = document.getElementById("cmd-overlay");
+      if (!overlay) return;
+      overlay.classList.add("open");
+      const input = document.getElementById("cmd-search-input");
+      input.value = "";
+      input.focus();
+      filterCmdPalette();
+    }
+
+    function closeCmdPalette(e) {
+      if (e && e.target && e.target.id !== "cmd-overlay" && e.target.tagName !== "KBD") return;
+      document.getElementById("cmd-overlay").classList.remove("open");
+    }
+
+    function filterCmdPalette() {
+      const q = document.getElementById("cmd-search-input").value.toLowerCase().trim();
+      const list = document.getElementById("cmd-results-list");
+
+      const actions = [
+        { title: "New Blank Workspace Tab", action: () => { createNewWorkspaceTab(); closeCmdPalette(); }, icon: "📑" },
+        { title: "Manage Dynamic Variables ({{var}})", action: () => { closeCmdPalette(); openVariablesModal(); }, icon: "🌐" },
+        { title: "Switch Theme: Dark Slate", action: () => { switchTheme("dark"); closeCmdPalette(); }, icon: "🌙" },
+        { title: "Switch Theme: Midnight OLED", action: () => { switchTheme("midnight"); closeCmdPalette(); }, icon: "🌌" },
+        { title: "Switch Theme: Cyberpunk Neon", action: () => { switchTheme("cyberpunk"); closeCmdPalette(); }, icon: "👾" },
+        { title: "Switch Theme: Light Modern", action: () => { switchTheme("light"); closeCmdPalette(); }, icon: "☀️" },
+        { title: "Switch to 3-Column Docs Portal (/docs)", action: () => { window.location.href = "/docs"; }, icon: "📖" },
+        { title: "Clear Request History", action: () => { clearHistoryLog(); closeCmdPalette(); }, icon: "🧹" }
+      ];
+
+      const matchingActions = actions.filter(a => !q || a.title.toLowerCase().includes(q));
+
+      const matchingOps = [];
+      if (specData && specData.paths) {
+        for (const path in specData.paths) {
+          for (const method in specData.paths[path]) {
+            if (!['get', 'post', 'put', 'delete', 'patch'].includes(method.toLowerCase())) continue;
+            const op = specData.paths[path][method];
+            const summary = op.summary || "";
+            if (!q || path.toLowerCase().includes(q) || summary.toLowerCase().includes(q) || method.toLowerCase().includes(q)) {
+              matchingOps.push({ method: method.toUpperCase(), path, summary });
+            }
+          }
+        }
+      }
+
+      let html = "";
+      if (matchingActions.length > 0) {
+        html += `<div style="font-size:10px; font-weight:700; text-transform:uppercase; color:var(--text-dim); padding:6px 12px 2px 12px;">Quick Actions</div>`;
+        matchingActions.forEach((a, i) => {
+          html += `
+            <div class="cmd-item-row" onclick="executeCmdAction(${actions.indexOf(a)})">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span>${a.icon}</span>
+                <span style="color:var(--text-main); font-weight:500;">${a.title}</span>
+              </div>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:10px; background:var(--bg-card); border:1px solid var(--border-color); padding:1px 5px; border-radius:4px;">Action</span>
+            </div>
+          `;
+        });
+      }
+
+      if (matchingOps.length > 0) {
+        html += `<div style="font-size:10px; font-weight:700; text-transform:uppercase; color:var(--text-dim); padding:8px 12px 2px 12px;">Endpoints (${matchingOps.length})</div>`;
+        matchingOps.slice(0, 15).forEach(ep => {
+          html += `
+            <div class="cmd-item-row" onclick="selectEndpoint('${ep.method}', '${ep.path}'); document.getElementById('cmd-overlay').classList.remove('open');">
+              <div style="display:flex; align-items:center; gap:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                <span class="method-badge badge-${ep.method.toLowerCase()}">${ep.method}</span>
+                <span style="font-family:'JetBrains Mono',monospace; color:var(--text-main); font-size:12px;">${ep.path}</span>
+                <span style="font-size:11px; color:var(--text-dim);">${ep.summary}</span>
+              </div>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:10px; background:var(--bg-card); border:1px solid var(--border-color); padding:1px 5px; border-radius:4px;">Open</span>
+            </div>
+          `;
+        });
+      }
+
+      list.innerHTML = html || `<div style="padding:20px; text-align:center; color:var(--text-dim);">No matching commands found.</div>`;
+    }
+
+    const registeredCmdActions = [
+      () => { createNewWorkspaceTab(); document.getElementById("cmd-overlay").classList.remove("open"); },
+      () => { document.getElementById("cmd-overlay").classList.remove("open"); openVariablesModal(); },
+      () => { switchTheme("dark"); document.getElementById("cmd-overlay").classList.remove("open"); },
+      () => { switchTheme("midnight"); document.getElementById("cmd-overlay").classList.remove("open"); },
+      () => { switchTheme("cyberpunk"); document.getElementById("cmd-overlay").classList.remove("open"); },
+      () => { switchTheme("light"); document.getElementById("cmd-overlay").classList.remove("open"); },
+      () => { window.location.href = "/docs"; },
+      () => { clearHistoryLog(); document.getElementById("cmd-overlay").classList.remove("open"); }
+    ];
+
+    function executeCmdAction(index) {
+      if (registeredCmdActions[index]) registeredCmdActions[index]();
+    }
+
+    // Dynamic Variables Modal
+    function openVariablesModal() {
+      const overlay = document.getElementById("var-modal-overlay");
+      overlay.classList.add("open");
+      renderCustomVarsTable();
+    }
+
+    function closeVariablesModal(e) {
+      if (e && e.target && e.target.id !== "var-modal-overlay" && e.target.tagName !== "BUTTON") return;
+      document.getElementById("var-modal-overlay").classList.remove("open");
+    }
+
+    function renderCustomVarsTable() {
+      const tbody = document.getElementById("tbody-custom-vars");
+      tbody.innerHTML = "";
+      for (const k in customVariables) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><input class="pm-grid-input var-key" value="${k}" placeholder="Key"></td>
+          <td><input class="pm-grid-input var-val" value="${customVariables[k]}" placeholder="Value"></td>
+          <td style="text-align:center;"><button class="btn-resp-tool" style="padding:1px 5px; font-size:11px;" onclick="this.closest('tr').remove()">✕</button></td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    function addCustomVarRow() {
+      const tbody = document.getElementById("tbody-custom-vars");
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input class="pm-grid-input var-key" value="" placeholder="New Variable"></td>
+        <td><input class="pm-grid-input var-val" value="" placeholder="Value"></td>
+        <td style="text-align:center;"><button class="btn-resp-tool" style="padding:1px 5px; font-size:11px;" onclick="this.closest('tr').remove()">✕</button></td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    function saveCustomVars() {
+      const updated = {};
+      document.querySelectorAll("#tbody-custom-vars tr").forEach(tr => {
+        const k = tr.querySelector(".var-key")?.value.trim();
+        const v = tr.querySelector(".var-val")?.value ?? "";
+        if (k) updated[k] = v;
+      });
+      customVariables = updated;
+      localStorage.setItem("openapi_custom_vars", JSON.stringify(customVariables));
+      closeVariablesModal();
+      showToast("Environment variables saved!");
+    }
+
+    let specData = null;
+    let activeEndpoint = null;
+    let lastResponseData = null;
+    let respViewMode = "raw"; // "raw", "tree", "diff"
+    let diffLayoutMode = "split"; // "split" or "unified"
+
+    let pinnedBaseline = null;
+    let pinnedBaselineTitle = "";
+    let responseHistory = {}; // Keyed by endpoint (METHOD PATH)
+
+    try {
+      const saved = localStorage.getItem("magicapi_pinned_baseline");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        pinnedBaseline = parsed.data;
+        pinnedBaselineTitle = parsed.title;
+      }
+    } catch (e) { }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.innerText = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function getCookie(name) {
+      const value = "; " + document.cookie;
+      const parts = value.split("; " + name + "=");
+      if (parts.length === 2) return parts.pop().split(";").shift();
+      return null;
+    }
+
+    function updateAuthStatus() {
+      const adminCookie = getCookie("adminAccessToken");
+      const clientCookie = getCookie("clientAccessToken");
+      const authText = document.getElementById("auth-text");
+      if (authText) {
+        if (adminCookie) {
+          authText.innerText = "Admin Logged In";
+        } else if (clientCookie) {
+          authText.innerText = "Client Logged In";
+        } else {
+          authText.innerText = "Cookie Auth Ready";
+        }
+      }
+    }
+
+    function countKeys(obj) {
+      if (typeof obj !== 'object' || obj === null) return 0;
+      let count = Object.keys(obj).length;
+      for (const k in obj) {
+        if (typeof obj[k] === 'object' && obj[k] !== null) {
+          count += countKeys(obj[k]);
+        }
+      }
+      return count;
+    }
+
+    // Load OpenAPI Spec (YAML)
+    async function loadSpec() {
+      try {
+        const yamlRes = await fetch("./docs/openapi.yaml?t=" + Date.now(), { cache: "no-cache" });
+        if (!yamlRes.ok) throw new Error("HTTP " + yamlRes.status);
+        const yamlText = await yamlRes.text();
+        specData = jsyaml.load(yamlText);
+        renderSidebar(specData);
+        handleDeepLink(specData);
+      } catch (err) {
+        console.error("Failed to load openapi.yaml:", err);
+        document.getElementById("sidebar-endpoints").innerHTML = `<div style="padding:20px; color:#ef4444;">Failed to load openapi.yaml</div>`;
+      }
+    }
+
+
+    function parseApiDate(isoStr) {
+      if (!isoStr) return 0;
+      const t = Date.parse(isoStr);
+      return isNaN(t) ? 0 : t;
+    }
+
+    function formatApiDateTime(isoStr) {
+      if (!isoStr) return "";
+      try {
+        const d = new Date(isoStr);
+        if (isNaN(d.getTime())) return isoStr;
+        const datePart = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        const timePart = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+        return `${datePart}, ${timePart}`;
+      } catch (e) {
+        return "";
+      }
+    }
+
+    function formatApiDateFull(isoStr) {
+      if (!isoStr) return "";
+      try {
+        const d = new Date(isoStr);
+        if (isNaN(d.getTime())) return isoStr;
+        const datePart = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        const timePart = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+        return `${datePart}, ${timePart}`;
+      } catch (e) {
+        return isoStr;
+      }
+    }
+
+    function renderSidebar(spec) {
+      const sidebarEl = document.getElementById("sidebar-endpoints");
+      sidebarEl.innerHTML = "";
+
+      const filter = document.getElementById("endpoint-filter").value.toLowerCase();
+      const sortMode = document.getElementById("endpoint-sort") ? document.getElementById("endpoint-sort").value : "default";
+      const tagsMap = {};
+      const savedCollapsedTags = JSON.parse(localStorage.getItem("magicapi_collapsed_tags") || "{}");
+
+      for (const path in spec.paths) {
+        for (const method in spec.paths[path]) {
+          const op = spec.paths[path][method];
+          const tag = (op.tags && op.tags[0]) || "General";
+          if (!tagsMap[tag]) tagsMap[tag] = [];
+
+          if (!filter || path.toLowerCase().includes(filter) || (op.summary && op.summary.toLowerCase().includes(filter))) {
+            tagsMap[tag].push({ path, method: method.toUpperCase(), op });
+          }
+        }
+      }
+
+      // 1. If sortMode === 'latest', prepend a dedicated "Latest Created (This Week)" section above all categories
+      if (sortMode === "latest") {
+        let maxTime = 0;
+        const allList = [];
+        for (const tag in tagsMap) {
+          tagsMap[tag].forEach(item => {
+            const t = parseApiDate(item.op["x-created-at"] || item.op["created_at"]);
+            if (t > maxTime) maxTime = t;
+            allList.push({ ...item, cTime: t });
+          });
+        }
+
+        const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+        const thisWeekList = allList.filter(item => item.cTime && (maxTime - item.cTime) <= oneWeekMs);
+        thisWeekList.sort((a, b) => b.cTime - a.cTime);
+
+        if (thisWeekList.length > 0) {
+          const topGroup = document.createElement("div");
+          topGroup.className = "tag-group latest-week-group";
+
+          const isCollapsed = !filter && !!savedCollapsedTags["__latest_week__"];
+
+          const header = document.createElement("div");
+          header.className = "tag-header latest-week-header" + (isCollapsed ? " collapsed" : "");
+          header.innerHTML = `
+            <div class="tag-header-left">
+              <span class="tag-chevron">▼</span>
+              <span style="font-weight:700; color:#60a5fa;">⚡ Latest Created (This Week)</span>
+            </div>
+            <span class="tag-count-badge" style="background:linear-gradient(135deg, #2563eb, #7c3aed); color:#fff; font-weight:700;">${thisWeekList.length} NEW</span>
+          `;
+
+          const itemsContainer = document.createElement("div");
+          itemsContainer.className = "tag-items" + (isCollapsed ? " collapsed" : "");
+
+          header.onclick = (e) => {
+            e.stopPropagation();
+            const collapsedNow = itemsContainer.classList.toggle("collapsed");
+            header.classList.toggle("collapsed", collapsedNow);
+            savedCollapsedTags["__latest_week__"] = collapsedNow;
+            localStorage.setItem("magicapi_collapsed_tags", JSON.stringify(savedCollapsedTags));
+            updateToggleAllBtn();
+          };
+
+          thisWeekList.forEach(item => {
+            const itemEl = document.createElement("div");
+            itemEl.className = "endpoint-item";
+            const cDate = item.op["x-created-at"] || item.op["created_at"];
+            itemEl.innerHTML = `
+              <span class="method-badge badge-${item.method.toLowerCase()}">${item.method}</span>
+              <span class="endpoint-path" title="${item.path}" style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.path}</span>
+              <span class="endpoint-date-badge" title="Created: ${cDate}">✨ ${formatApiDateTime(cDate)}</span>
+            `;
+            itemEl.onclick = () => selectEndpoint(item);
+            itemsContainer.appendChild(itemEl);
+          });
+
+          topGroup.appendChild(header);
+          topGroup.appendChild(itemsContainer);
+          sidebarEl.appendChild(topGroup);
+        }
+      }
+
+      // Sort items within each tag group
+      for (const tag in tagsMap) {
+        if (sortMode === "latest") {
+          tagsMap[tag].sort((a, b) => {
+            const tA = parseApiDate(a.op["x-created-at"] || a.op["created_at"]);
+            const tB = parseApiDate(b.op["x-created-at"] || b.op["created_at"]);
+            return tB - tA;
+          });
+        } else if (sortMode === "updated") {
+          tagsMap[tag].sort((a, b) => {
+            const tA = parseApiDate(a.op["x-updated-at"] || a.op["updated_at"] || a.op["x-created-at"] || a.op["created_at"]);
+            const tB = parseApiDate(b.op["x-updated-at"] || b.op["updated_at"] || b.op["x-created-at"] || b.op["created_at"]);
+            return tB - tA;
+          });
+        } else if (sortMode === "alpha") {
+          tagsMap[tag].sort((a, b) => a.path.localeCompare(b.path));
+        }
+      }
+
+      // Sort tag groups based on sortMode
+      const tagKeys = Object.keys(tagsMap);
+      if (sortMode === "latest") {
+        tagKeys.sort((a, b) => {
+          const maxA = Math.max(...tagsMap[a].map(item => parseApiDate(item.op["x-created-at"] || item.op["created_at"])));
+          const maxB = Math.max(...tagsMap[b].map(item => parseApiDate(item.op["x-created-at"] || item.op["created_at"])));
+          return maxB - maxA;
+        });
+      } else if (sortMode === "updated") {
+        tagKeys.sort((a, b) => {
+          const maxA = Math.max(...tagsMap[a].map(item => parseApiDate(item.op["x-updated-at"] || item.op["updated_at"] || item.op["x-created-at"] || item.op["created_at"])));
+          const maxB = Math.max(...tagsMap[b].map(item => parseApiDate(item.op["x-updated-at"] || item.op["updated_at"] || item.op["x-created-at"] || item.op["created_at"])));
+          return maxB - maxA;
+        });
+      } else if (sortMode === "alpha") {
+        tagKeys.sort((a, b) => a.localeCompare(b));
+      }
+
+      for (const tag of tagKeys) {
+        if (tagsMap[tag].length === 0) continue;
+        const group = document.createElement("div");
+        group.className = "tag-group";
+
+        const isCollapsed = !filter && !!savedCollapsedTags[tag];
+
+        const header = document.createElement("div");
+        header.className = "tag-header" + (isCollapsed ? " collapsed" : "");
+        header.innerHTML = `
+          <div class="tag-header-left">
+            <span class="tag-chevron">▼</span>
+            <span>${tag}</span>
+          </div>
+          <span class="tag-count-badge">${tagsMap[tag].length}</span>
+        `;
+
+        const itemsContainer = document.createElement("div");
+        itemsContainer.className = "tag-items" + (isCollapsed ? " collapsed" : "");
+
+        header.onclick = (e) => {
+          e.stopPropagation();
+          const collapsedNow = itemsContainer.classList.toggle("collapsed");
+          header.classList.toggle("collapsed", collapsedNow);
+          savedCollapsedTags[tag] = collapsedNow;
+          localStorage.setItem("magicapi_collapsed_tags", JSON.stringify(savedCollapsedTags));
+          updateToggleAllBtn();
+        };
+
+        tagsMap[tag].forEach(item => {
+          const itemEl = document.createElement("div");
+          itemEl.className = "endpoint-item";
+
+          const cDate = item.op["x-created-at"] || item.op["created_at"];
+          const uDate = item.op["x-updated-at"] || item.op["updated_at"];
+          const isRecentNew = parseApiDate(cDate) >= parseApiDate("2026-08-30T00:00:00Z");
+
+          let badgeHtml = "";
+          if (sortMode === "latest" && cDate) {
+            badgeHtml = `<span class="endpoint-date-badge" title="Created: ${cDate}">✨ ${formatApiDateTime(cDate)}</span>`;
+          } else if (sortMode === "updated" && uDate) {
+            badgeHtml = `<span class="endpoint-date-badge" title="Updated: ${uDate}">🔄 ${formatApiDateTime(uDate)}</span>`;
+          } else if (isRecentNew) {
+            badgeHtml = `<span class="endpoint-new-pill">NEW</span>`;
+          }
+
+          itemEl.innerHTML = `
+            <span class="method-badge badge-${item.method.toLowerCase()}">${item.method}</span>
+            <span class="endpoint-path" title="${item.path}" style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.path}</span>
+            ${badgeHtml}
+          `;
+          itemEl.onclick = () => selectEndpoint(item);
+          itemsContainer.appendChild(itemEl);
+        });
+
+        group.appendChild(header);
+        group.appendChild(itemsContainer);
+        sidebarEl.appendChild(group);
+      }
+
+      updateToggleAllBtn();
+    }
+
+    function handleDeepLink(spec) {
+      if (!spec || !spec.paths) return;
+      const urlParams = new URLSearchParams(window.location.search);
+      let deepMethod = urlParams.get("method");
+      let deepPath = urlParams.get("path");
+
+      if (!deepMethod && window.location.hash) {
+        const hash = window.location.hash.substring(1);
+        const dashIdx = hash.indexOf("-");
+        if (dashIdx !== -1) {
+          deepMethod = hash.substring(0, dashIdx).toUpperCase();
+          let pathPart = hash.substring(dashIdx + 1);
+          if (!pathPart.startsWith("/")) pathPart = "/" + pathPart;
+          deepPath = pathPart;
+        }
+      }
+
+      if (deepMethod && deepPath) {
+        deepMethod = deepMethod.toUpperCase();
+        for (const p in spec.paths) {
+          if (p === deepPath || p.toLowerCase() === deepPath.toLowerCase()) {
+            const op = spec.paths[p][deepMethod.toLowerCase()];
+            if (op) {
+              selectEndpoint({ path: p, method: deepMethod, op });
+              // Highlight active element in sidebar
+              setTimeout(() => {
+                document.querySelectorAll(".endpoint-item").forEach(el => {
+                  if (el.querySelector(".endpoint-path")?.innerText === p && el.querySelector(".method-badge")?.innerText === deepMethod) {
+                    el.classList.add("active");
+                    el.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }
+                });
+              }, 150);
+              return;
+            }
+          }
+        }
+      }
+    }
+
+    function updateToggleAllBtn() {
+      const btn = document.getElementById("btn-toggle-all-tags");
+      if (!btn) return;
+      const itemContainers = document.querySelectorAll(".tag-items");
+      if (itemContainers.length === 0) return;
+      const isAnyExpanded = Array.from(itemContainers).some(el => !el.classList.contains("collapsed"));
+      btn.innerText = isAnyExpanded ? "Fold All" : "Unfold All";
+    }
+
+    function initEnvironmentSelector() {
+      const currentHost = window.location.hostname || "localhost";
+      const defaultApiBase = `http://${currentHost}:8000/v1`;
+
+      const envSelect = document.getElementById("env-select");
+      if (!envSelect) return;
+
+      envSelect.innerHTML = `
+        <option value="https://api.magicapi.dev/v1">Production (https://api.magicapi.dev/v1)</option>
+        <option value="${defaultApiBase}">Current Host (${currentHost}:8000/v1)</option>
+        <option value="http://localhost:8000/v1">Localhost (localhost:8000/v1)</option>
+        <option value="http://192.168.1.16:8000/v1">LAN Host (192.168.1.16:8000/v1)</option>
+        <option value="http://192.168.1.20:8000/v1">Staging / Dev (192.168.1.20:8000/v1)</option>
+      `;
+
+      const savedEnv = localStorage.getItem("magicapi_active_env");
+      if (savedEnv && (savedEnv.includes(currentHost) || savedEnv.includes("192.168") || savedEnv.includes("localhost"))) {
+        envSelect.value = savedEnv;
+      } else {
+        envSelect.value = defaultApiBase;
+      }
+
+      envSelect.onchange = () => {
+        localStorage.setItem("magicapi_active_env", envSelect.value);
+        if (activeEndpoint) {
+          updateUrlFromParams();
+          updateCodeSnippet();
+        }
+      };
+    }
+
+    function updateUrlFromParams() {
+      if (!activeEndpoint) return;
+      const currentHost = window.location.hostname || "localhost";
+      const defaultApiBase = `http://${currentHost}:8000/v1`;
+      let base = (document.getElementById("env-select") && document.getElementById("env-select").value) || defaultApiBase;
+      const opServers = (activeEndpoint.op && activeEndpoint.op.servers) || (specData && specData.paths && specData.paths[activeEndpoint.path] && specData.paths[activeEndpoint.path].servers);
+      if ((opServers && opServers.length > 0 && !opServers[0].url.includes("/v1")) || activeEndpoint.path.startsWith("/health")) {
+        base = base.replace(/\/v1\/?$/, "");
+      }
+
+      let computedPath = activeEndpoint.path;
+      const queryParams = new URLSearchParams();
+
+      const paramRows = document.querySelectorAll("#tbody-params tr");
+      paramRows.forEach(row => {
+        const k = row.querySelector(".param-key")?.value.trim();
+        const v = row.querySelector(".param-val")?.value.trim();
+        if (!k) return;
+
+        const pathPlaceholder = "{" + k + "}";
+        if (computedPath.includes(pathPlaceholder)) {
+          if (v) {
+            computedPath = computedPath.split(pathPlaceholder).join(encodeURIComponent(v));
+          }
+        } else if (v) {
+          queryParams.append(k, v);
+        }
+      });
+
+      let fullUrl = base + (computedPath.startsWith("/") ? computedPath : "/" + computedPath);
+      if (queryParams.toString()) {
+        fullUrl += (fullUrl.includes("?") ? "&" : "?") + queryParams.toString();
+      }
+      document.getElementById("request-url").value = fullUrl;
+    }
+
+    function syncParamsFromUrl() {
+      if (!activeEndpoint) return;
+      const urlInput = document.getElementById("request-url").value.trim();
+      if (!urlInput) return;
+
+      try {
+        let pathname = "";
+        let search = "";
+        if (urlInput.startsWith("http://") || urlInput.startsWith("https://")) {
+          const urlObj = new URL(urlInput);
+          pathname = urlObj.pathname;
+          search = urlObj.search;
+        } else {
+          const splitQ = urlInput.split("?");
+          pathname = splitQ[0];
+          search = splitQ[1] ? "?" + splitQ[1] : "";
+        }
+
+        const template = activeEndpoint.path;
+        const paramNames = [];
+        const escaped = template.replace(/[-/\\^$*+?.()|[\]]/g, '\\$&');
+        const patternStr = escaped.replace(/\\\{([a-zA-Z0-9_-]+)\\\}/g, (_, name) => {
+          paramNames.push(name);
+          return "([^/?#]+)";
+        });
+
+        const re = new RegExp(patternStr + "$");
+        const match = pathname.match(re);
+
+        if (match && paramNames.length > 0) {
+          paramNames.forEach((name, idx) => {
+            const rawVal = match[idx + 1];
+            if (rawVal !== undefined && !rawVal.startsWith("{")) {
+              const decoded = decodeURIComponent(rawVal);
+              const rows = document.querySelectorAll("#tbody-params tr");
+              rows.forEach(row => {
+                const k = row.querySelector(".param-key")?.value.trim();
+                if (k === name) {
+                  const valInput = row.querySelector(".param-val");
+                  if (valInput && valInput.value !== decoded) {
+                    valInput.value = decoded;
+                  }
+                }
+              });
+            }
+          });
+        }
+
+        if (search) {
+          const qParams = new URLSearchParams(search);
+          qParams.forEach((val, key) => {
+            const rows = document.querySelectorAll("#tbody-params tr");
+            let found = false;
+            rows.forEach(row => {
+              const k = row.querySelector(".param-key")?.value.trim();
+              if (k === key) {
+                found = true;
+                const valInput = row.querySelector(".param-val");
+                if (valInput && valInput.value !== val) {
+                  valInput.value = val;
+                }
+              }
+            });
+          });
+        }
+      } catch (e) { }
+    }
+
+    function selectEndpoint(item) {
+      activeEndpoint = item;
+      document.querySelectorAll(".endpoint-item").forEach(el => el.classList.remove("active"));
+      event.currentTarget.classList.add("active");
+
+      document.getElementById("active-endpoint-title").innerText = item.op.summary || item.path;
+      document.getElementById("request-method").value = item.method;
+
+      // Populate Created/Updated Badges
+      const badgesContainer = document.getElementById("endpoint-meta-badges");
+      if (badgesContainer) {
+        const cAt = item.op["x-created-at"] || item.op["created_at"];
+        const uAt = item.op["x-updated-at"] || item.op["updated_at"];
+        let badgesHtml = "";
+        if (cAt) {
+          badgesHtml += `<span class="meta-date-badge" title="Endpoint Created: ${cAt}">📅 <strong>Created:</strong> ${formatApiDateFull(cAt)}</span>`;
+        }
+        if (uAt) {
+          badgesHtml += `<span class="meta-date-badge" title="Endpoint Last Updated: ${uAt}">🔄 <strong>Updated:</strong> ${formatApiDateFull(uAt)}</span>`;
+        }
+        badgesContainer.innerHTML = badgesHtml;
+      }
+
+      // Populate Params
+      const tbodyParams = document.getElementById("tbody-params");
+      tbodyParams.innerHTML = "";
+      const params = item.op.parameters || [];
+      if (params.length > 0) {
+        document.getElementById("dot-params").style.display = "inline-block";
+        params.forEach(p => {
+          const defaultVal = p.schema?.default !== undefined ? p.schema.default : (p.schema?.example !== undefined ? p.schema.example : (p.example !== undefined ? p.example : (p.schema?.enum ? p.schema.enum[0] : "")));
+          addParamRow(p.name, defaultVal, p.description || "");
+        });
+      } else {
+        document.getElementById("dot-params").style.display = "none";
+      }
+
+      updateUrlFromParams();
+
+      // Populate Request Body
+      const tbodyForm = document.getElementById("tbody-body-form");
+      tbodyForm.innerHTML = "";
+      const rawEditor = document.getElementById("body-raw-editor");
+
+      let hasBody = false;
+      if (item.op.requestBody) {
+        hasBody = true;
+        const content = item.op.requestBody.content || {};
+        const isMultipart = !!content["multipart/form-data"];
+        const schema = isMultipart
+          ? content["multipart/form-data"]?.schema
+          : (content["application/json"]?.schema || content["application/x-www-form-urlencoded"]?.schema);
+
+        // Check if there are file upload fields
+        let hasFileField = false;
+        if (schema && schema.properties) {
+          for (const key in schema.properties) {
+            const prop = schema.properties[key];
+            if (prop.format === "binary" || prop.type === "file" || (prop.type === "string" && (prop.format === "binary" || key.toLowerCase().includes("logo") || key.toLowerCase().includes("doc") || key.toLowerCase().includes("file") || key.toLowerCase().includes("image") || key.toLowerCase().includes("moa")))) {
+              hasFileField = true;
+              break;
+            }
+          }
+        }
+
+        // Auto-switch body type radio
+        const targetRadioValue = (isMultipart && hasFileField) ? "form-data" : (content["application/json"] ? "raw" : "form-data");
+        const targetRadio = document.querySelector(`input[name="bodyType"][value="${targetRadioValue}"]`);
+        if (targetRadio) {
+          targetRadio.checked = true;
+          document.querySelectorAll(".body-type-radio").forEach(el => el.classList.remove("active"));
+          targetRadio.closest(".body-type-radio")?.classList.add("active");
+          const formView = document.getElementById("body-form-data-view");
+          const rawView = document.getElementById("body-raw-editor");
+          if (targetRadioValue === "raw") {
+            formView.style.display = "none";
+            rawView.style.display = "block";
+          } else {
+            formView.style.display = "block";
+            rawView.style.display = "none";
+          }
+        }
+
+        if (schema && schema.properties) {
+          const sampleObj = {};
+          for (const key in schema.properties) {
+            const prop = schema.properties[key];
+            const isFile = prop.format === "binary" || prop.type === "file" || (prop.type === "string" && (prop.format === "binary" || key.toLowerCase().includes("logo") || key.toLowerCase().includes("doc") || key.toLowerCase().includes("file") || key.toLowerCase().includes("image") || key.toLowerCase().includes("moa")));
+            const defaultVal = prop.example !== undefined ? prop.example : (prop.default || "");
+            sampleObj[key] = defaultVal;
+            addBodyRow(key, isFile ? "" : (typeof defaultVal === "object" ? JSON.stringify(defaultVal) : String(defaultVal)), prop.description || "", isFile ? "file" : "text");
+          }
+          rawEditor.value = JSON.stringify(sampleObj, null, 2);
+        }
+      }
+
+      document.getElementById("dot-body").style.display = hasBody ? "inline-block" : "none";
+      updateCodeSnippet();
+    }
+
+    function addParamRow(key = "", val = "", desc = "") {
+      const tbody = document.getElementById("tbody-params");
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input class="pm-grid-input param-key" placeholder="Key"></td>
+        <td><input class="pm-grid-input param-val" placeholder="Value"></td>
+        <td><input class="pm-grid-input param-desc" placeholder="Description"></td>
+        <td><button class="btn-row-action" onclick="this.closest('tr').remove(); updateUrlFromParams(); updateCodeSnippet();">✕</button></td>
+      `;
+      tr.querySelector(".param-key").value = key;
+      tr.querySelector(".param-val").value = val;
+      tr.querySelector(".param-desc").value = desc;
+      tr.querySelectorAll("input").forEach(i => i.addEventListener("input", () => {
+        updateUrlFromParams();
+        updateCodeSnippet();
+      }));
+      tbody.appendChild(tr);
+    }
+
+    function addBodyRow(key = "", val = "", desc = "", type = "text") {
+      const tbody = document.getElementById("tbody-body-form");
+      const tr = document.createElement("tr");
+      const isFile = type === "file";
+
+      tr.innerHTML = `
+        <td><input class="pm-grid-input body-key" placeholder="Key"></td>
+        <td>
+          <select class="pm-grid-input body-field-type" style="padding:4px 6px; cursor:pointer; color:#58a6ff; font-weight:600; font-size:11.5px; width:100%;">
+            <option value="text" ${!isFile ? "selected" : ""}>Text</option>
+            <option value="file" ${isFile ? "selected" : ""}>File</option>
+          </select>
+        </td>
+        <td class="body-val-cell">
+          ${isFile ? `
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input type="file" class="body-file-input" style="font-size:11.5px; color:var(--text-main); max-width:240px; background:rgba(255,255,255,0.04); border:1px dashed var(--border-color); border-radius:4px; padding:3px 6px; cursor:pointer;">
+              <span class="body-file-info" style="font-size:11px; color:#86efac; font-family:'JetBrains Mono',monospace;"></span>
+            </div>
+          ` : `
+            <input class="pm-grid-input body-val" placeholder="Value">
+          `}
+        </td>
+        <td><input class="pm-grid-input body-desc" placeholder="Description"></td>
+        <td><button class="btn-row-action" onclick="this.closest('tr').remove(); updateCodeSnippet();">✕</button></td>
+      `;
+
+      tr.querySelector(".body-key").value = key;
+      const bodyValInput = tr.querySelector(".body-val");
+      if (bodyValInput) bodyValInput.value = val;
+      tr.querySelector(".body-desc").value = desc;
+
+      const typeSelect = tr.querySelector(".body-field-type");
+      const valCell = tr.querySelector(".body-val-cell");
+
+      typeSelect.addEventListener("change", (e) => {
+        const selectedType = e.target.value;
+        if (selectedType === "file") {
+          valCell.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input type="file" class="body-file-input" style="font-size:11.5px; color:var(--text-main); max-width:240px; background:rgba(255,255,255,0.04); border:1px dashed var(--border-color); border-radius:4px; padding:3px 6px; cursor:pointer;">
+              <span class="body-file-info" style="font-size:11px; color:#86efac; font-family:'JetBrains Mono',monospace;"></span>
+            </div>
+          `;
+          const fi = valCell.querySelector(".body-file-input");
+          fi.addEventListener("change", () => {
+            const file = fi.files[0];
+            valCell.querySelector(".body-file-info").innerText = file ? `(${file.name} - ${(file.size / 1024).toFixed(1)} KB)` : "";
+            updateCodeSnippet();
+          });
+        } else {
+          valCell.innerHTML = `<input class="pm-grid-input body-val" placeholder="Value">`;
+          valCell.querySelector(".body-val").addEventListener("input", updateCodeSnippet);
+        }
+        updateCodeSnippet();
+      });
+
+      const initialFileInput = tr.querySelector(".body-file-input");
+      if (initialFileInput) {
+        initialFileInput.addEventListener("change", () => {
+          const file = initialFileInput.files[0];
+          const info = tr.querySelector(".body-file-info");
+          if (info) info.innerText = file ? `(${file.name} - ${(file.size / 1024).toFixed(1)} KB)` : "";
+          updateCodeSnippet();
+        });
+      }
+
+      tr.querySelectorAll("input").forEach(i => i.addEventListener("input", updateCodeSnippet));
+      tbody.appendChild(tr);
+    }
+
+    function updateCodeSnippet() {
+      if (!activeEndpoint) return;
+      const lang = document.getElementById("code-lang-select").value;
+      const method = document.getElementById("request-method").value;
+      const url = document.getElementById("request-url").value;
+
+      const headers = { "Accept": "*/*" };
+      const csrf = getCookie("csrf_token");
+      if (csrf) headers["X-CSRF-Token"] = csrf;
+
+      let body = null;
+      let formFields = [];
+      if (method !== "GET") {
+        const bodyType = document.querySelector('input[name="bodyType"]:checked')?.value || "raw";
+        if (bodyType === "raw") {
+          headers["Content-Type"] = "application/json";
+          const raw = document.getElementById("body-raw-editor").value;
+          try { body = JSON.parse(raw); } catch (e) { }
+        } else if (bodyType === "form-data") {
+          document.querySelectorAll("#tbody-body-form tr").forEach(row => {
+            const k = row.querySelector(".body-key")?.value.trim();
+            const type = row.querySelector(".body-field-type")?.value || "text";
+            if (k) {
+              if (type === "file") {
+                const fi = row.querySelector(".body-file-input");
+                const fname = fi?.files[0]?.name || "file.bin";
+                formFields.push({ key: k, type: "file", filename: fname });
+              } else {
+                const v = row.querySelector(".body-val")?.value ?? "";
+                formFields.push({ key: k, type: "text", value: v });
+              }
+            }
+          });
+        } else if (bodyType === "x-www-form-urlencoded") {
+          headers["Content-Type"] = "application/x-www-form-urlencoded";
+        }
+      }
+
+      let code = "";
+      if (lang === "curl") {
+        code = `curl -X ${method} '${url}'`;
+        for (const h in headers) code += ` \\\n  -H '${h}: ${headers[h]}'`;
+        if (body) {
+          code += ` \\\n  --data '${JSON.stringify(body)}'`;
+        } else if (formFields.length > 0) {
+          formFields.forEach(f => {
+            if (f.type === "file") {
+              code += ` \\\n  -F '${f.key}=@${f.filename}'`;
+            } else {
+              code += ` \\\n  -F '${f.key}=${f.value}'`;
+            }
+          });
+        }
+      } else if (lang === "fetch") {
+        if (formFields.length > 0) {
+          code = `const formData = new FormData();\n`;
+          formFields.forEach(f => {
+            if (f.type === "file") {
+              code += `// formData.append('${f.key}', fileInput.files[0]);\n`;
+            } else {
+              code += `formData.append('${f.key}', '${f.value}');\n`;
+            }
+          });
+          code += `\nfetch('${url}', {\n  method: '${method}',\n  credentials: 'include',\n  headers: ${JSON.stringify(headers, null, 4)},\n  body: formData\n})\n.then(res => res.json())\n.then(data => console.log(data));`;
+        } else {
+          code = `fetch('${url}', {\n  method: '${method}',\n  credentials: 'include',\n  headers: ${JSON.stringify(headers, null, 4)},\n  ${body ? "body: JSON.stringify(" + JSON.stringify(body, null, 2) + ")" : ""}\n})\n.then(res => res.json())\n.then(data => console.log(data));`;
+        }
+      } else if (lang === "python") {
+        if (formFields.length > 0) {
+          const textData = {};
+          const fileData = [];
+          formFields.forEach(f => {
+            if (f.type === "file") {
+              fileData.push(`'${f.key}': open('${f.filename}', 'rb')`);
+            } else {
+              textData[f.key] = f.value;
+            }
+          });
+          code = `import requests\n\nurl = "${url}"\nheaders = ${JSON.stringify(headers, null, 4)}\n`;
+          code += `data = ${JSON.stringify(textData, null, 4)}\n`;
+          if (fileData.length > 0) {
+            code += `files = {${fileData.join(", ")}}\n`;
+            code += `response = requests.${method.toLowerCase()}(url, data=data, files=files, headers=headers)\n`;
+          } else {
+            code += `response = requests.${method.toLowerCase()}(url, data=data, headers=headers)\n`;
+          }
+          code += `\nprint(response.json())`;
+        } else {
+          code = `import requests\n\nurl = "${url}"\nheaders = ${JSON.stringify(headers, null, 4)}\n${body ? "payload = " + JSON.stringify(body, null, 4) + "\nresponse = requests." + method.toLowerCase() + "(url, json=payload, headers=headers)" : "response = requests." + method.toLowerCase() + "(url, headers=headers)"}\n\nprint(response.json())`;
+        }
+      } else if (lang === "go") {
+        code = `package main\n\nimport (\n\t"fmt"\n\t"net/http"\n\t"io"\n)\n\nfunc main() {\n\treq, err := http.NewRequest("${method}", "${url}", nil)\n\tif err != nil {\n\t\tpanic(err)\n\t}\n\tclient := &http.Client{}\n\tresp, err := client.Do(req)\n\tif err != nil {\n\t\tpanic(err)\n\t}\n\tdefer resp.Body.Close()\n\tbody, _ := io.ReadAll(resp.Body)\n\tfmt.Println(string(body))\n}`;
+      }
+
+      document.getElementById("code-snippet-pre").innerText = code;
+    }
+
+    let lastResponseHeaders = [];
+    let lastResponseCookies = [];
+    let activeRespTab = "body"; // "body", "cookies", "headers"
+
+    // Execute Request
+    async function sendRequest() {
+      syncParamsFromUrl();
+      const method = document.getElementById("request-method").value;
+      let rawUrl = document.getElementById("request-url").value.trim();
+      if (!rawUrl) return;
+      let url = interpolateVariables(rawUrl);
+
+      const engineMode = document.getElementById("engine-mode-select")?.value || "live";
+      if (engineMode === "mock") {
+        const mockStatus = document.getElementById("mock-status-select")?.value || "200";
+        document.getElementById("response-output").innerHTML = `<div style="color:var(--border-focus); padding:20px;">🎲 Synthesizing mock response for [${mockStatus}] from OpenAPI schema...</div>`;
+        setTimeout(() => {
+          let respSchema = null;
+          if (activeEndpoint && activeEndpoint.op && activeEndpoint.op.responses) {
+            const respObj = activeEndpoint.op.responses[mockStatus] || activeEndpoint.op.responses["200"] || Object.values(activeEndpoint.op.responses)[0];
+            respSchema = respObj?.content?.["application/json"]?.schema;
+          }
+          const mockData = synthesizeMockResponse(respSchema);
+          lastResponseData = mockData;
+          document.getElementById("resp-status-badge").style.display = "inline-block";
+          document.getElementById("resp-status-badge").innerText = `${mockStatus} Mock`;
+          document.getElementById("resp-status-badge").className = mockStatus.startsWith("2") ? "stat-badge-status" : "stat-badge-status error";
+          document.getElementById("resp-time-badge").style.display = "inline-block";
+          document.getElementById("resp-time-badge").innerText = `⏱️ 12 ms (Mock)`;
+          renderResponseContent();
+        }, 100);
+        return;
+      }
+
+      const missingParamMatch = url.match(/\{([a-zA-Z0-9_-]+)\}/);
+      if (missingParamMatch) {
+        const missingParam = missingParamMatch[1];
+        showToast(`⚠️ Please enter a value for path parameter '{${missingParam}}'`);
+        const paramTab = document.querySelector('.pm-tab[data-req-tab="params"]');
+        if (paramTab) paramTab.click();
+        const rows = document.querySelectorAll("#tbody-params tr");
+        rows.forEach(row => {
+          const k = row.querySelector(".param-key")?.value.trim();
+          if (k === missingParam) {
+            row.querySelector(".param-val")?.focus();
+          }
+        });
+        return;
+      }
+
+      const headers = { "Accept": "*/*" };
+      const csrf = getCookie("csrf_token");
+      if (csrf) headers["X-CSRF-Token"] = csrf;
+
+      const bodyType = document.querySelector('input[name="bodyType"]:checked').value;
+      let reqBody = null;
+
+      if (method !== "GET") {
+        if (bodyType === "raw") {
+          headers["Content-Type"] = "application/json";
+          reqBody = document.getElementById("body-raw-editor").value;
+        } else if (bodyType === "form-data") {
+          const formData = new FormData();
+          document.querySelectorAll("#tbody-body-form tr").forEach(row => {
+            const k = row.querySelector(".body-key")?.value.trim();
+            const type = row.querySelector(".body-field-type")?.value || "text";
+            if (k) {
+              if (type === "file") {
+                const fi = row.querySelector(".body-file-input");
+                if (fi && fi.files && fi.files[0]) {
+                  formData.append(k, fi.files[0]);
+                }
+              } else {
+                const v = row.querySelector(".body-val")?.value ?? "";
+                formData.append(k, v);
+              }
+            }
+          });
+          reqBody = formData;
+          // Do NOT set Content-Type manually for FormData; browser sets multipart/form-data with boundary
+          delete headers["Content-Type"];
+        } else if (bodyType === "x-www-form-urlencoded") {
+          headers["Content-Type"] = "application/x-www-form-urlencoded";
+          const formParams = new URLSearchParams();
+          document.querySelectorAll("#tbody-body-form tr").forEach(row => {
+            const k = row.querySelector(".body-key")?.value.trim();
+            const v = row.querySelector(".body-val")?.value.trim() ?? "";
+            if (k) formParams.append(k, v);
+          });
+          reqBody = formParams.toString();
+        }
+      }
+
+      const outputEl = document.getElementById("response-output");
+      outputEl.innerHTML = `<div style="color:#58a6ff; padding:20px;">Sending request to ${url}...</div>`;
+
+      const startTime = performance.now();
+
+      try {
+        const res = await fetch(url, {
+          method,
+          headers,
+          body: reqBody,
+          credentials: "include"
+        });
+
+        const duration = Math.round(performance.now() - startTime);
+        const text = await res.text();
+        const sizeBytes = new Blob([text]).size;
+        const statusText = `${res.status} ${res.statusText || ""}`;
+
+        const statusBadge = document.getElementById("resp-status-badge");
+        statusBadge.style.display = "inline-block";
+        statusBadge.innerText = statusText;
+        statusBadge.className = res.ok ? "stat-badge-status" : "stat-badge-status error";
+
+        const modalStatus = document.getElementById("modal-status-badge");
+        modalStatus.innerText = statusText;
+        modalStatus.className = res.ok ? "stat-badge-status" : "stat-badge-status error";
+
+        document.getElementById("resp-time-badge").style.display = "inline-block";
+        document.getElementById("resp-time-badge").innerText = `⏱️ ${duration} ms`;
+
+        const sizeStr = sizeBytes > 1024 ? (sizeBytes / 1024).toFixed(1) + ' KB' : sizeBytes + ' B';
+        document.getElementById("resp-size-badge").style.display = "inline-block";
+        document.getElementById("resp-size-badge").innerText = `📦 ${sizeStr}`;
+        document.getElementById("modal-stat-size").innerText = sizeStr;
+
+        // Capture Response Headers
+        lastResponseHeaders = [];
+        for (const [k, v] of res.headers.entries()) {
+          lastResponseHeaders.push({ key: k, value: v });
+        }
+        const hdrTabBtn = document.querySelector('.resp-tab[data-resp-tab="headers"]');
+        if (hdrTabBtn) hdrTabBtn.innerText = `Headers (${lastResponseHeaders.length})`;
+
+        // Capture Active Cookies
+        lastResponseCookies = [];
+        const rawCookies = document.cookie;
+        if (rawCookies) {
+          rawCookies.split(";").forEach(pair => {
+            const parts = pair.split("=");
+            if (parts.length >= 2) {
+              const name = parts[0].trim();
+              const val = parts.slice(1).join("=").trim();
+              if (name) {
+                lastResponseCookies.push({
+                  name: name,
+                  value: val,
+                  domain: window.location.hostname || "localhost",
+                  path: "/",
+                  expires: "Session",
+                  httpOnly: name.toLowerCase().includes("token") ? "Yes" : "No"
+                });
+              }
+            }
+          });
+        }
+        const cookieTabBtn = document.querySelector('.resp-tab[data-resp-tab="cookies"]');
+        if (cookieTabBtn) cookieTabBtn.innerText = `Cookies (${lastResponseCookies.length})`;
+
+        try {
+          lastResponseData = JSON.parse(text);
+          document.getElementById("modal-stat-keys").innerText = countKeys(lastResponseData);
+        } catch (e) {
+          lastResponseData = text;
+          document.getElementById("modal-stat-keys").innerText = "Raw Text";
+        }
+
+        const epKey = method + " " + (activeEndpoint?.path || url);
+        responseHistory[epKey] = lastResponseData;
+
+        renderResponseContent();
+        updateAuthStatus();
+        // Auto log to history
+        requestHistoryLog.unshift({
+          id: "hist_" + Date.now(),
+          method,
+          url,
+          status: statusText,
+          duration,
+          timestamp: new Date().toLocaleTimeString()
+        });
+        if (requestHistoryLog.length > 30) requestHistoryLog.pop();
+        localStorage.setItem("openapi_req_history_log", JSON.stringify(requestHistoryLog));
+        updateHistoryUI();
+
+        // Auto token capture
+        if (typeof lastResponseData === "object" && lastResponseData !== null) {
+          const detectedToken = lastResponseData.access_token || lastResponseData.accessToken || lastResponseData.token || lastResponseData.jwt || lastResponseData.data?.token;
+          if (detectedToken && typeof detectedToken === "string") {
+            customVariables.token = detectedToken;
+            localStorage.setItem("openapi_custom_vars", JSON.stringify(customVariables));
+            showToast("🔑 Token detected and auto-saved to {{token}}!");
+          }
+        }
+      } catch (err) {
+        document.getElementById("resp-status-badge").style.display = "inline-block";
+        document.getElementById("resp-status-badge").innerText = "Network / CORS Error";
+        document.getElementById("resp-status-badge").className = "stat-badge-status error";
+        outputEl.innerHTML = `
+          <div style="color:#ef4444; padding:20px; line-height:1.6;">
+            <div style="font-weight:700; font-size:14px; margin-bottom:6px;">⚠️ Connection Failed (${err.message})</div>
+            <div style="color:var(--text-muted); font-size:12.5px;">
+              Could not complete request to <code>${url}</code>.<br>
+              • Ensure backend server is running on the target port.<br>
+              • Check browser console (F12) for CORS policy errors or blocked requests.
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // =========================================================================
+    // RESPONSE RENDERING (BODY, COOKIES, HEADERS)
+    // =========================================================================
+    function renderResponseContent(targetEl = null, searchFilterId = "resp-search-input") {
+      const outputEl = targetEl || document.getElementById("response-output");
+      const diffSubbar = targetEl ? document.getElementById("modal-diff-subbar") : document.getElementById("resp-diff-subbar");
+      const toolsRight = document.querySelector(".response-tools-right");
+
+      if (!lastResponseData && lastResponseHeaders.length === 0 && lastResponseCookies.length === 0) return;
+
+      // Handle Headers Tab
+      if (activeRespTab === "headers" && !targetEl) {
+        if (diffSubbar) diffSubbar.classList.remove("active");
+        if (toolsRight) {
+          document.getElementById("btn-resp-tree").style.display = "none";
+          document.getElementById("btn-resp-raw").style.display = "none";
+          document.getElementById("btn-resp-diff").style.display = "none";
+          document.getElementById("btn-resp-pin").style.display = "none";
+        }
+
+        if (lastResponseHeaders.length === 0) {
+          outputEl.innerHTML = `<div style="color:var(--text-muted); padding:30px; text-align:center;">No response headers captured for this request.</div>`;
+          return;
+        }
+
+        let rowsHtml = lastResponseHeaders.map(h => `
+          <tr>
+            <td style="color:#58a6ff; font-weight:600; padding:8px 16px; border-bottom:1px solid var(--border-color);">${h.key}</td>
+            <td style="color:#f0f6fc; padding:8px 16px; border-bottom:1px solid var(--border-color); font-family:'JetBrains Mono',monospace; word-break:break-all;">${h.value}</td>
+          </tr>
+        `).join("");
+
+        outputEl.innerHTML = `
+          <div style="padding:4px 0;">
+            <table class="pm-grid-table" style="width:100%;">
+              <thead>
+                <tr>
+                  <th style="width:35%;">Header Name</th>
+                  <th style="width:65%;">Header Value</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+          </div>
+        `;
+        return;
+      }
+
+      // Handle Cookies Tab
+      if (activeRespTab === "cookies" && !targetEl) {
+        if (diffSubbar) diffSubbar.classList.remove("active");
+        if (toolsRight) {
+          document.getElementById("btn-resp-tree").style.display = "none";
+          document.getElementById("btn-resp-raw").style.display = "none";
+          document.getElementById("btn-resp-diff").style.display = "none";
+          document.getElementById("btn-resp-pin").style.display = "none";
+        }
+
+        if (lastResponseCookies.length === 0) {
+          outputEl.innerHTML = `
+            <div style="color:var(--text-muted); padding:30px; text-align:center;">
+              <div style="font-size:28px; margin-bottom:8px;">🍪</div>
+              <p>No active cookies found in this browser session.</p>
+              <p style="font-size:12px; margin-top:6px;">Login via <code>/v1/admin/auth/login/verify-otp</code> or <code>/v1/clients/auth/login/verify-otp</code> to set auth cookies.</p>
+            </div>
+          `;
+          return;
+        }
+
+        let rowsHtml = lastResponseCookies.map(c => `
+          <tr>
+            <td style="color:#22c55e; font-weight:600; padding:8px 16px; border-bottom:1px solid var(--border-color);">${c.name}</td>
+            <td style="color:#f0f6fc; padding:8px 16px; border-bottom:1px solid var(--border-color); font-family:'JetBrains Mono',monospace; word-break:break-all;">
+              <span style="background:rgba(255,255,255,0.06); padding:2px 6px; border-radius:4px;">${c.value.length > 45 ? c.value.substring(0, 45) + '...' : c.value}</span>
+              <button class="btn-resp-tool" style="display:inline-flex; padding:1px 6px; font-size:10px; margin-left:8px;" onclick="navigator.clipboard.writeText('${c.value}'); showToast('📋 Cookie value copied!');">Copy</button>
+            </td>
+            <td style="color:var(--text-muted); padding:8px 16px; border-bottom:1px solid var(--border-color);">${c.domain}</td>
+            <td style="color:var(--text-muted); padding:8px 16px; border-bottom:1px solid var(--border-color);">${c.path}</td>
+            <td style="color:#58a6ff; padding:8px 16px; border-bottom:1px solid var(--border-color); font-size:11px;">${c.httpOnly === 'Yes' ? '🔒 Auth Token' : 'Regular'}</td>
+          </tr>
+        `).join("");
+
+        outputEl.innerHTML = `
+          <div style="padding:4px 0;">
+            <table class="pm-grid-table" style="width:100%;">
+              <thead>
+                <tr>
+                  <th style="width:25%;">Cookie Name</th>
+                  <th style="width:35%;">Value</th>
+                  <th style="width:15%;">Domain</th>
+                  <th style="width:10%;">Path</th>
+                  <th style="width:15%;">Type</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+          </div>
+        `;
+        return;
+      }
+
+      // Handle Body Tab
+      if (toolsRight && !targetEl) {
+        document.getElementById("btn-resp-tree").style.display = "inline-flex";
+        document.getElementById("btn-resp-raw").style.display = "inline-flex";
+        document.getElementById("btn-resp-diff").style.display = "inline-flex";
+        document.getElementById("btn-resp-pin").style.display = "inline-flex";
+      }
+
+      const filterInput = document.getElementById(searchFilterId);
+      const filterText = filterInput ? filterInput.value : "";
+
+      if (respViewMode === "diff") {
+        if (diffSubbar) diffSubbar.classList.add("active");
+        renderDiffInto(outputEl);
+      } else {
+        if (diffSubbar) diffSubbar.classList.remove("active");
+
+        if (respViewMode === "tree") {
+          outputEl.innerHTML = "";
+          const tree = createTreeElement(lastResponseData, null, filterText, 0);
+          outputEl.appendChild(tree);
+        } else {
+          const jsonStr = typeof lastResponseData === "string" ? lastResponseData : JSON.stringify(lastResponseData, null, 2);
+          outputEl.innerHTML = `<pre style="margin:0; color:#f0f6fc;">${syntaxHighlightJSON(jsonStr)}</pre>`;
+        }
+      }
+
+      syncToolbarState();
+    }
+
+    function syncToolbarState() {
+      const isTree = respViewMode === "tree";
+      const isRaw = respViewMode === "raw";
+      const isDiff = respViewMode === "diff";
+
+      document.getElementById("btn-resp-tree").classList.toggle("active", isTree);
+      document.getElementById("modal-btn-tree").classList.toggle("active", isTree);
+
+      document.getElementById("btn-resp-raw").classList.toggle("active", isRaw);
+      document.getElementById("modal-btn-raw").classList.toggle("active", isRaw);
+
+      document.getElementById("btn-resp-diff").classList.toggle("active", isDiff);
+      document.getElementById("modal-btn-diff").classList.toggle("active", isDiff);
+
+      const isPinned = !!pinnedBaseline;
+      document.getElementById("btn-resp-pin").classList.toggle("btn-resp-tool-pinned", isPinned);
+      document.getElementById("modal-btn-pin").classList.toggle("btn-resp-tool-pinned", isPinned);
+      document.getElementById("modal-stat-pinned").innerText = pinnedBaselineTitle || (isPinned ? "Active" : "None");
+    }
+
+    function createTreeElement(data, keyName, filterText, depth) {
+      const container = document.createElement("div");
+      container.className = depth === 0 ? "tree-root" : "tree-node";
+
+      const line = document.createElement("div");
+      line.style.display = "flex";
+      line.style.alignItems = "baseline";
+
+      const isObject = typeof data === "object" && data !== null;
+      const isArray = Array.isArray(data);
+
+      if (isObject) {
+        const toggle = document.createElement("span");
+        toggle.className = "tree-toggle";
+        toggle.innerHTML = "▼";
+
+        const childrenContainer = document.createElement("div");
+        toggle.onclick = (e) => {
+          e.stopPropagation();
+          const isCollapsed = toggle.classList.toggle("collapsed");
+          childrenContainer.style.display = isCollapsed ? "none" : "block";
+        };
+
+        line.appendChild(toggle);
+
+        if (keyName !== null) {
+          const keySpan = document.createElement("span");
+          keySpan.className = "tree-key";
+          keySpan.innerText = '"' + keyName + '": ';
+          line.appendChild(keySpan);
+        }
+
+        const openBracket = document.createElement("span");
+        openBracket.style.color = "#94a3b8";
+        openBracket.innerText = isArray ? "[" : "{";
+        line.appendChild(openBracket);
+
+        const badge = document.createElement("span");
+        badge.className = "tree-badge";
+        const keys = Object.keys(data);
+        badge.innerText = isArray ? keys.length + " items" : keys.length + " keys";
+        line.appendChild(badge);
+
+        container.appendChild(line);
+
+        keys.forEach(k => {
+          const childElem = createTreeElement(data[k], isArray ? null : k, filterText, depth + 1);
+          childrenContainer.appendChild(childElem);
+        });
+
+        const closeLine = document.createElement("div");
+        closeLine.style.color = "#94a3b8";
+        closeLine.style.marginLeft = "18px";
+        closeLine.innerText = isArray ? "]" : "}";
+        childrenContainer.appendChild(closeLine);
+
+        container.appendChild(childrenContainer);
+      } else {
+        const spacer = document.createElement("span");
+        spacer.style.display = "inline-block";
+        spacer.style.width = "18px";
+        line.appendChild(spacer);
+
+        if (keyName !== null) {
+          const keySpan = document.createElement("span");
+          keySpan.className = "tree-key";
+          keySpan.innerText = '"' + keyName + '": ';
+          line.appendChild(keySpan);
+        }
+
+        const valSpan = document.createElement("span");
+        if (typeof data === "string") {
+          valSpan.className = "tree-str";
+          valSpan.innerText = JSON.stringify(data);
+        } else if (typeof data === "number") {
+          valSpan.className = "tree-num";
+          valSpan.innerText = String(data);
+        } else if (typeof data === "boolean") {
+          valSpan.className = "tree-bool";
+          valSpan.innerText = String(data);
+        } else if (data === null) {
+          valSpan.className = "tree-null";
+          valSpan.innerText = "null";
+        }
+
+        if (filterText && filterText.trim() !== "") {
+          const text = valSpan.innerText;
+          const reg = new RegExp("(" + filterText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ")", "gi");
+          if (reg.test(text) || (keyName && reg.test(keyName))) {
+            valSpan.innerHTML = text.replace(reg, '<span class="tree-highlight">$1</span>');
+          }
+        }
+
+        line.appendChild(valSpan);
+        container.appendChild(line);
+      }
+
+      return container;
+    }
+
+    function computeJsonDiff(baseObj, currentObj) {
+      let stats = { added: 0, removed: 0, modified: 0 };
+      const lines = [];
+
+      function deepDiff(base, curr, path, indent) {
+        const pad = "  ".repeat(indent);
+
+        if (base === undefined && curr !== undefined) {
+          stats.added++;
+          lines.push({ type: "added", text: pad + "+ " + (path ? '"' + path + '": ' : "") + JSON.stringify(curr, null, 2).replace(/\n/g, "\n" + pad + "  ") });
+          return;
+        }
+
+        if (base !== undefined && curr === undefined) {
+          stats.removed++;
+          lines.push({ type: "removed", text: pad + "- " + (path ? '"' + path + '": ' : "") + JSON.stringify(base, null, 2).replace(/\n/g, "\n" + pad + "  ") });
+          return;
+        }
+
+        const typeBase = typeof base;
+        const typeCurr = typeof curr;
+
+        if (typeBase !== typeCurr || base === null || curr === null || typeBase !== "object") {
+          if (base !== curr) {
+            stats.modified++;
+            lines.push({
+              type: "modified",
+              text: pad + "~ " + (path ? '"' + path + '": ' : "") + JSON.stringify(base) + " ➔ " + JSON.stringify(curr)
+            });
+          } else {
+            lines.push({ type: "unchanged", text: pad + "  " + (path ? '"' + path + '": ' : "") + JSON.stringify(curr) });
+          }
+          return;
+        }
+
+        const isBaseArr = Array.isArray(base);
+        const isCurrArr = Array.isArray(curr);
+
+        if (isBaseArr !== isCurrArr) {
+          stats.modified++;
+          lines.push({ type: "modified", text: pad + "~ " + (path ? '"' + path + '": ' : "") + JSON.stringify(base) + " ➔ " + JSON.stringify(curr) });
+          return;
+        }
+
+        lines.push({ type: "unchanged", text: pad + "  " + (path ? '"' + path + '": ' : "") + (isBaseArr ? "[" : "{") });
+        const allKeys = Array.from(new Set([...Object.keys(base || {}), ...Object.keys(curr || {})]));
+        for (const k of allKeys) {
+          deepDiff(base ? base[k] : undefined, curr ? curr[k] : undefined, isBaseArr ? null : k, indent + 1);
+        }
+        lines.push({ type: "unchanged", text: pad + "  " + (isBaseArr ? "]" : "}") });
+      }
+
+      deepDiff(baseObj, currentObj, null, 0);
+      return { lines, stats };
+    }
+
+    function renderDiffInto(outputEl) {
+      const targetSelect = outputEl.id === "modal-content" ? document.getElementById("modal-diff-target-select") : document.getElementById("diff-target-select");
+      const targetType = targetSelect.value;
+      const method = document.getElementById("request-method").value;
+      const epKey = method + " " + (activeEndpoint?.path || document.getElementById("request-url").value);
+
+      let compareBaseline = null;
+      let baselineLabel = "Baseline";
+
+      if (targetType === "pinned") {
+        compareBaseline = pinnedBaseline;
+        baselineLabel = pinnedBaselineTitle ? "Pinned (" + pinnedBaselineTitle + ")" : "Pinned Baseline";
+      } else if (targetType === "previous") {
+        compareBaseline = responseHistory[epKey] || null;
+        baselineLabel = "Previous Call";
+      } else if (targetType === "custom") {
+        const customInput = prompt("Paste raw JSON to compare:");
+        if (customInput) {
+          try {
+            compareBaseline = JSON.parse(customInput);
+            baselineLabel = "Custom Pasted JSON";
+          } catch (e) {
+            alert("Invalid JSON!");
+            return;
+          }
+        }
+      }
+
+      if (!compareBaseline) {
+        outputEl.innerHTML = `
+          <div style="text-align:center; padding: 30px; color:var(--text-muted);">
+            <div style="font-size: 28px; margin-bottom: 8px;">📌</div>
+            <p>No comparison baseline found. Click <strong>📌 Pin</strong> to store current response as reference.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const diffResult = computeJsonDiff(compareBaseline, lastResponseData);
+
+      ["metric-added", "modal-metric-added"].forEach(id => document.getElementById(id).innerText = "+" + diffResult.stats.added + " Added");
+      ["metric-removed", "modal-metric-removed"].forEach(id => document.getElementById(id).innerText = "-" + diffResult.stats.removed + " Removed");
+      ["metric-modified", "modal-metric-modified"].forEach(id => document.getElementById(id).innerText = "~" + diffResult.stats.modified + " Modified");
+
+      if (diffLayoutMode === "split") {
+        outputEl.innerHTML = `
+          <div class="diff-side-by-side">
+            <div class="diff-pane">
+              <div class="diff-pane-title"><span>◀ ${baselineLabel}</span></div>
+              <pre style="margin:0; color:#f0f6fc;">${syntaxHighlightJSON(JSON.stringify(compareBaseline, null, 2))}</pre>
+            </div>
+            <div class="diff-pane">
+              <div class="diff-pane-title"><span>▶ Current Response</span></div>
+              <pre style="margin:0; color:#f0f6fc;">${syntaxHighlightJSON(JSON.stringify(lastResponseData, null, 2))}</pre>
+            </div>
+          </div>
+        `;
+      } else {
+        const container = document.createElement("div");
+        container.className = "diff-container";
+        diffResult.lines.forEach(item => {
+          const row = document.createElement("div");
+          row.className = "diff-line " + item.type;
+          row.innerText = item.text;
+          container.appendChild(row);
+        });
+        outputEl.innerHTML = "";
+        outputEl.appendChild(container);
+      }
+    }
+
+    function pinCurrent() {
+      if (!lastResponseData) return;
+      pinnedBaseline = JSON.parse(JSON.stringify(lastResponseData));
+      pinnedBaselineTitle = document.getElementById("active-endpoint-title").innerText || "Pinned Snapshot";
+      try {
+        localStorage.setItem("magicapi_pinned_baseline", JSON.stringify({
+          title: pinnedBaselineTitle,
+          data: pinnedBaseline
+        }));
+      } catch (e) { }
+      syncToolbarState();
+      showToast("📌 Pinned current response as baseline!");
+    }
+
+    function copyCurrentResponse() {
+      if (!lastResponseData) return;
+      const text = typeof lastResponseData === "string" ? lastResponseData : JSON.stringify(lastResponseData, null, 2);
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("📋 Response copied to clipboard!");
+      });
+    }
+
+    function saveCurrentResponse() {
+      if (!lastResponseData) return;
+      const text = typeof lastResponseData === "string" ? lastResponseData : JSON.stringify(lastResponseData, null, 2);
+      const blob = new Blob([text], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "response_" + Date.now() + ".json";
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("💾 JSON saved!");
+    }
+
+    function syntaxHighlightJSON(jsonStr) {
+      return jsonStr.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+        let cls = 'tree-num';
+        if (/^"/.test(match)) {
+          cls = /:$/.test(match) ? 'tree-key' : 'tree-str';
+        } else if (/true|false/.test(match)) {
+          cls = 'tree-bool';
+        } else if (/null/.test(match)) {
+          cls = 'tree-null';
+        }
+        return '<span class="' + cls + '">' + match + '</span>';
+      });
+    }
+
+    // Tab Navigation Setup & Resizers
+    window.onload = function () {
+      initEnvironmentSelector();
+      loadSpec();
+      updateAuthStatus();
+
+      // =======================================================================
+      // DRAGGABLE RESIZERS (SIDEBAR & WORKSPACE SPLIT)
+      // =======================================================================
+      const sidebar = document.getElementById("sidebar-panel");
+      const resizerV = document.getElementById("sidebar-resizer");
+
+      const savedWidth = localStorage.getItem("magicapi_sidebar_width");
+      if (savedWidth) {
+        sidebar.style.width = savedWidth + "px";
+      }
+
+      let isDraggingV = false;
+      resizerV.addEventListener("mousedown", (e) => {
+        isDraggingV = true;
+        resizerV.classList.add("dragging");
+        document.body.style.cursor = "col-resize";
+        document.body.style.userSelect = "none";
+      });
+
+      const reqSection = document.getElementById("req-config-area");
+      const resizerH = document.getElementById("workspace-resizer");
+
+      const savedReqHeight = localStorage.getItem("magicapi_req_height");
+      if (savedReqHeight) {
+        reqSection.style.height = savedReqHeight + "px";
+      }
+
+      let isDraggingH = false;
+      let startY = 0;
+      let startHeight = 0;
+
+      resizerH.addEventListener("mousedown", (e) => {
+        isDraggingH = true;
+        resizerH.classList.add("dragging");
+        startY = e.clientY;
+        startHeight = reqSection.offsetHeight;
+        document.body.style.cursor = "row-resize";
+        document.body.style.userSelect = "none";
+      });
+
+      document.addEventListener("mousemove", (e) => {
+        if (isDraggingV) {
+          const newWidth = Math.min(Math.max(e.clientX, 180), 750);
+          sidebar.style.width = newWidth + "px";
+          localStorage.setItem("magicapi_sidebar_width", newWidth);
+        }
+        if (isDraggingH) {
+          const delta = e.clientY - startY;
+          const newHeight = Math.min(Math.max(startHeight + delta, 90), window.innerHeight - 200);
+          reqSection.style.height = newHeight + "px";
+          localStorage.setItem("magicapi_req_height", newHeight);
+        }
+      });
+
+      document.addEventListener("mouseup", () => {
+        if (isDraggingV) {
+          isDraggingV = false;
+          resizerV.classList.remove("dragging");
+          document.body.style.cursor = "";
+          document.body.style.userSelect = "";
+        }
+        if (isDraggingH) {
+          isDraggingH = false;
+          resizerH.classList.remove("dragging");
+          document.body.style.cursor = "";
+          document.body.style.userSelect = "";
+        }
+      });
+
+      document.getElementById("endpoint-filter").addEventListener("input", () => {
+        if (specData) renderSidebar(specData);
+      });
+
+      document.getElementById("endpoint-sort").addEventListener("change", () => {
+        if (specData) renderSidebar(specData);
+      });
+
+      document.getElementById("btn-toggle-all-tags").onclick = () => {
+        const itemContainers = document.querySelectorAll(".tag-items");
+        const headers = document.querySelectorAll(".tag-header");
+        const isAnyExpanded = Array.from(itemContainers).some(el => !el.classList.contains("collapsed"));
+        const shouldCollapse = isAnyExpanded;
+
+        const savedCollapsedTags = {};
+        itemContainers.forEach(c => c.classList.toggle("collapsed", shouldCollapse));
+        headers.forEach(h => {
+          h.classList.toggle("collapsed", shouldCollapse);
+          const name = h.querySelector(".tag-header-left span:last-child")?.innerText;
+          if (name) savedCollapsedTags[name] = shouldCollapse;
+        });
+        savedCollapsedTags["__latest_week__"] = shouldCollapse;
+
+        localStorage.setItem("magicapi_collapsed_tags", JSON.stringify(savedCollapsedTags));
+        updateToggleAllBtn();
+      };
+
+      document.getElementById("btn-send-request").onclick = sendRequest;
+      document.getElementById("btn-add-param").onclick = () => addParamRow();
+      document.getElementById("btn-add-body-field").onclick = () => addBodyRow();
+      document.getElementById("request-url").addEventListener("input", () => {
+        syncParamsFromUrl();
+        updateCodeSnippet();
+      });
+
+      // Request Tabs
+      const reqTabs = document.querySelectorAll(".pm-tab");
+      reqTabs.forEach(t => {
+        t.onclick = () => {
+          reqTabs.forEach(b => b.classList.remove("active"));
+          t.classList.add("active");
+          const tab = t.dataset.reqTab;
+
+          document.getElementById("view-params").style.display = tab === "params" ? "block" : "none";
+          document.getElementById("view-auth").style.display = tab === "auth" ? "block" : "none";
+          document.getElementById("view-headers").style.display = tab === "headers" ? "block" : "none";
+          document.getElementById("view-body").style.display = tab === "body" ? "flex" : "none";
+          document.getElementById("body-type-bar").style.display = tab === "body" ? "flex" : "none";
+          document.getElementById("view-code").style.display = tab === "code" ? "flex" : "none";
+
+          if (tab === "code") updateCodeSnippet();
+        };
+      });
+
+      // Body Type Radio Selector
+      const bodyRadios = document.querySelectorAll('input[name="bodyType"]');
+      bodyRadios.forEach(r => {
+        r.onchange = () => {
+          document.querySelectorAll(".body-type-radio").forEach(el => el.classList.remove("active"));
+          r.closest(".body-type-radio").classList.add("active");
+
+          const type = r.value;
+          const formView = document.getElementById("body-form-data-view");
+          const rawView = document.getElementById("body-raw-editor");
+
+          if (type === "raw") {
+            formView.style.display = "none";
+            rawView.style.display = "block";
+          } else {
+            formView.style.display = "block";
+            rawView.style.display = "none";
+          }
+          updateCodeSnippet();
+        };
+      });
+
+      document.getElementById("code-lang-select").onchange = updateCodeSnippet;
+      document.getElementById("btn-copy-snippet").onclick = () => {
+        navigator.clipboard.writeText(document.getElementById("code-snippet-pre").innerText).then(() => {
+          showToast("📋 Code snippet copied to clipboard!");
+        });
+      };
+
+      // Response Tabs (Body, Cookies, Headers)
+      const respTabs = document.querySelectorAll(".resp-tab");
+      respTabs.forEach(t => {
+        t.onclick = () => {
+          respTabs.forEach(b => b.classList.remove("active"));
+          t.classList.add("active");
+          activeRespTab = t.dataset.respTab;
+          renderResponseContent();
+        };
+      });
+
+      // Toolbar Handlers
+      function setMode(mode) {
+        respViewMode = mode;
+        document.getElementById("btn-resp-raw")?.classList.toggle("active", mode === "raw");
+        document.getElementById("btn-resp-tree")?.classList.toggle("active", mode === "tree");
+        document.getElementById("btn-resp-diff")?.classList.toggle("active", mode === "diff");
+        document.getElementById("modal-btn-raw")?.classList.toggle("active", mode === "raw");
+        document.getElementById("modal-btn-tree")?.classList.toggle("active", mode === "tree");
+        document.getElementById("modal-btn-diff")?.classList.toggle("active", mode === "diff");
+
+        const isModalOpen = document.getElementById("json-modal").classList.contains("open");
+        if (isModalOpen) {
+          renderResponseContent(document.getElementById("modal-content"), "modal-search-input");
+        } else {
+          renderResponseContent(document.getElementById("response-output"), "resp-search-input");
+        }
+      }
+
+      document.getElementById("btn-resp-tree").onclick = () => setMode("tree");
+      document.getElementById("modal-btn-tree").onclick = () => setMode("tree");
+
+      document.getElementById("btn-resp-raw").onclick = () => setMode("raw");
+      document.getElementById("modal-btn-raw").onclick = () => setMode("raw");
+
+      document.getElementById("btn-resp-diff").onclick = () => setMode("diff");
+      document.getElementById("modal-btn-diff").onclick = () => setMode("diff");
+
+      document.getElementById("btn-resp-pin").onclick = pinCurrent;
+      document.getElementById("modal-btn-pin").onclick = pinCurrent;
+
+      document.getElementById("btn-resp-copy").onclick = copyCurrentResponse;
+      document.getElementById("modal-btn-copy").onclick = copyCurrentResponse;
+
+      document.getElementById("btn-resp-save").onclick = saveCurrentResponse;
+      document.getElementById("modal-btn-save").onclick = saveCurrentResponse;
+
+      document.getElementById("resp-search-input").addEventListener("input", () => {
+        renderResponseContent(document.getElementById("response-output"), "resp-search-input");
+      });
+      document.getElementById("modal-search-input").addEventListener("input", () => {
+        renderResponseContent(document.getElementById("modal-content"), "modal-search-input");
+      });
+
+      document.getElementById("diff-target-select").onchange = (e) => {
+        document.getElementById("modal-diff-target-select").value = e.target.value;
+        renderResponseContent(document.getElementById("response-output"), "resp-search-input");
+      };
+      document.getElementById("modal-diff-target-select").onchange = (e) => {
+        document.getElementById("diff-target-select").value = e.target.value;
+        renderResponseContent(document.getElementById("modal-content"), "modal-search-input");
+      };
+
+      const toggleLayout = () => {
+        diffLayoutMode = diffLayoutMode === "split" ? "unified" : "split";
+        const isModalOpen = document.getElementById("json-modal").classList.contains("open");
+        if (isModalOpen) {
+          renderResponseContent(document.getElementById("modal-content"), "modal-search-input");
+        } else {
+          renderResponseContent(document.getElementById("response-output"), "resp-search-input");
+        }
+      };
+
+      document.getElementById("btn-diff-layout").onclick = toggleLayout;
+      document.getElementById("modal-btn-diff-layout").onclick = toggleLayout;
+
+      // Fullscreen Modal Controls
+      document.getElementById("btn-resp-fullscreen").onclick = () => {
+        const modal = document.getElementById("json-modal");
+        modal.classList.add("open");
+        document.getElementById("modal-title").innerText = (activeEndpoint?.op?.summary || activeEndpoint?.path || "Response Analyzer");
+        renderResponseContent(document.getElementById("modal-content"), "modal-search-input");
+      };
+      document.getElementById("btn-close-modal").onclick = () => {
+        document.getElementById("json-modal").classList.remove("open");
+      };
+      document.addEventListener("keydown", (e) => {
+        if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
+          e.preventDefault();
+          openCmdPalette();
+        }
+        if (e.key === "Escape") {
+          document.getElementById("json-modal")?.classList.remove("open");
+          document.getElementById("cmd-overlay")?.classList.remove("open");
+          document.getElementById("var-modal-overlay")?.classList.remove("open");
+        }
+      });
+      updateHistoryUI();
+      updateCollectionsUI();
+      toggleTabsFeature(isTabModeEnabled);
+    };
+  </script>
+</body>
+
+</html>

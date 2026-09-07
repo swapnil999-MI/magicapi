@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "magicapi": {
+      "command": "/Users/swapnil/Desktop/PayLogic/swapnil/openapi-doc-studio/bin/magicapi-mcp",
+      "args": ["--stdio"]
+    }
+  }
+}

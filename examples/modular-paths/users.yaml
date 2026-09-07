@@ -1,0 +1,105 @@
+/users:
+  get:
+    tags:
+      - Users
+    summary: List All Users
+    description: Retrieves a paginated list of system users.
+    x-created-at: "2026-08-31T12:00:00Z"
+    x-updated-at: "2026-08-31T18:00:00Z"
+    security:
+      - BearerAuth: []
+    parameters:
+      - name: page
+        in: query
+        description: Page number
+        schema:
+          type: integer
+          default: 1
+      - name: limit
+        in: query
+        description: Items per page
+        schema:
+          type: integer
+          default: 10
+      - name: status
+        in: query
+        description: Filter by status
+        schema:
+          type: string
+          enum: [active, pending, suspended]
+          default: active
+    responses:
+      '200':
+        description: Users retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                data:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "usr_12345"
+                      name:
+                        type: string
+                        example: "Jane Doe"
+                      email:
+                        type: string
+                        example: "jane@example.com"
+  post:
+    tags:
+      - Users
+    summary: Create New User
+    description: Registers a new user in the platform.
+    x-created-at: "2026-08-31T14:30:00Z"
+    x-updated-at: "2026-08-31T18:30:00Z"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+              - email
+            properties:
+              name:
+                type: string
+                example: "Jane Doe"
+              email:
+                type: string
+                example: "jane@example.com"
+              role:
+                type: string
+                enum: [admin, member, viewer]
+                default: member
+    responses:
+      '201':
+        description: User created successfully
+
+/users/{id}:
+  get:
+    tags:
+      - Users
+    summary: Get User by ID
+    description: Fetch details of an existing user.
+    x-created-at: "2026-08-20T10:00:00Z"
+    x-updated-at: "2026-08-25T11:00:00Z"
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique user ID
+        schema:
+          type: string
+          example: "usr_12345"
+    responses:
+      '200':
+        description: User details

@@ -1,0 +1,183 @@
+openapi: 3.0.3
+info:
+  title: MagicAPI Demo API
+  version: 1.0.0
+  description: High-performance API documented with MagicAPI.
+servers:
+- url: http://localhost:8000/api/v1
+  description: Local Development Server
+- url: https://api.example.com/v1
+  description: Production Server
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+paths:
+  /auth/login:
+    post:
+      tags:
+      - Authentication
+      summary: User Authentication Login
+      description: Authenticates user credentials and returns session tokens.
+      x-created-at: '2026-08-15T09:00:00Z'
+      x-updated-at: '2026-08-20T10:00:00Z'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - email
+              - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin@example.com
+                password:
+                  type: string
+                  format: password
+                  example: SecretPassword123!
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  token_type:
+                    type: string
+                    example: Bearer
+                  expires_in:
+                    type: integer
+                    example: 3600
+  /auth/logout:
+    post:
+      tags:
+      - Authentication
+      summary: Logout Session
+      description: Invalidate the current session token.
+      x-created-at: '2026-08-15T09:00:00Z'
+      x-updated-at: '2026-08-20T10:00:00Z'
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Logged out successfully
+  /users:
+    get:
+      tags:
+      - Users
+      summary: List All Users
+      description: Retrieves a paginated list of system users.
+      x-created-at: '2026-08-31T12:00:00Z'
+      x-updated-at: '2026-08-31T18:00:00Z'
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: page
+        in: query
+        description: Page number
+        schema:
+          type: integer
+          default: 1
+      - name: limit
+        in: query
+        description: Items per page
+        schema:
+          type: integer
+          default: 10
+      - name: status
+        in: query
+        description: Filter by status
+        schema:
+          type: string
+          enum:
+          - active
+          - pending
+          - suspended
+          default: active
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: usr_12345
+                        name:
+                          type: string
+                          example: Jane Doe
+                        email:
+                          type: string
+                          example: jane@example.com
+    post:
+      tags:
+      - Users
+      summary: Create New User
+      description: Registers a new user in the platform.
+      x-created-at: '2026-08-31T14:30:00Z'
+      x-updated-at: '2026-08-31T18:30:00Z'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - name
+              - email
+              properties:
+                name:
+                  type: string
+                  example: Jane Doe
+                email:
+                  type: string
+                  example: jane@example.com
+                role:
+                  type: string
+                  enum:
+                  - admin
+                  - member
+                  - viewer
+                  default: member
+      responses:
+        '201':
+          description: User created successfully
+  /users/{id}:
+    get:
+      tags:
+      - Users
+      summary: Get User by ID
+      description: Fetch details of an existing user.
+      x-created-at: '2026-08-20T10:00:00Z'
+      x-updated-at: '2026-08-25T11:00:00Z'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique user ID
+        schema:
+          type: string
+          example: usr_12345
+      responses:
+        '200':
+          description: User details

@@ -1,0 +1,10 @@
+.git
+.gitignore
+.dockerignore
+node_modules
+frontend/node_modules
+bin
+*.log
+.DS_Store
+dist
+scratch

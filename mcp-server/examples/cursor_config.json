@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "magicapi-remote": {
+      "url": "http://192.168.1.20:8088/sse"
+    },
+    "magicapi-local": {
+      "command": "/Users/swapnil/Desktop/PayLogic/swapnil/openapi-doc-studio/bin/magicapi-mcp",
+      "args": ["--stdio", "--spec=openapi.yaml"]
+    }
+  }
+}
