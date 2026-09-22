@@ -79,7 +79,7 @@ export const DocsPortal: React.FC = () => {
     }> = [];
 
     for (const [path, pathItem] of Object.entries(spec.paths)) {
-      for (const method of ['get', 'post', 'put', 'delete', 'patch'] as const) {
+      for (const method of ['get', 'post', 'put', 'delete', 'patch', 'options', 'head', 'trace'] as const) {
         const op = (pathItem as any)[method];
         if (!op) continue;
 
@@ -100,11 +100,26 @@ export const DocsPortal: React.FC = () => {
           continue;
         }
 
+        const rawParams = [
+          ...(pathItem.parameters || []),
+          ...(op.parameters || []),
+        ];
+        const seen = new Set<string>();
+        const mergedParams: any[] = [];
+        for (const p of rawParams) {
+          const k = `${p.in}:${p.name}`;
+          if (!seen.has(k)) {
+            seen.add(k);
+            mergedParams.push(p);
+          }
+        }
+        const effectiveOp = { ...op, parameters: mergedParams };
+
         allEndpoints.push({
           method: method.toUpperCase(),
           path,
           summary,
-          op,
+          op: effectiveOp,
           tags,
           createdAt,
           updatedAt,
@@ -162,8 +177,16 @@ export const DocsPortal: React.FC = () => {
         return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
       case 'DELETE':
         return 'bg-red-500/15 text-red-400 border-red-500/30';
-      default:
+      case 'PATCH':
         return 'bg-purple-500/15 text-purple-400 border-purple-500/30';
+      case 'OPTIONS':
+        return 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30';
+      case 'HEAD':
+        return 'bg-teal-500/15 text-teal-400 border-teal-500/30';
+      case 'TRACE':
+        return 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30';
+      default:
+        return 'bg-blue-500/15 text-blue-400 border-blue-500/30';
     }
   };
 
@@ -445,24 +468,90 @@ func main() {
       <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-12">
         <div className="max-w-6xl mx-auto space-y-16">
           {/* Header Introduction Card */}
-          <div className="border-b border-[var(--border-color)] pb-8">
-            <h1 className="text-3xl font-extrabold text-[var(--text-main)] tracking-tight">
-              {spec?.info?.title || 'API Reference & Documentation'}
-            </h1>
-            <p className="text-sm text-[var(--text-muted)] mt-3 leading-relaxed max-w-3xl">
+          <div className="border-b border-[var(--border-color)] pb-8 space-y-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-3xl font-extrabold text-[var(--text-main)] tracking-tight">
+                {spec?.info?.title || 'API Reference & Documentation'}
+              </h1>
+              {spec?.info?.version && (
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">
+                  v{spec.info.version}
+                </span>
+              )}
+              {spec?.openapi && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono text-[var(--text-dim)] bg-[var(--bg-input)] border border-[var(--border-color)]">
+                  OAS {spec.openapi}
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-[var(--text-muted)] leading-relaxed max-w-3xl">
               {spec?.info?.description ||
                 'Welcome to the comprehensive API documentation. Explore endpoints, inspect schemas, and test live requests directly in the Studio.'}
             </p>
+            <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--text-dim)] pt-2">
+              {spec?.info?.contact && (
+                <div className="flex items-center gap-1.5">
+                  <span className="font-semibold text-[var(--text-muted)]">Contact:</span>
+                  {spec.info.contact.email ? (
+                    <a href={`mailto:${spec.info.contact.email}`} className="text-blue-400 hover:underline">
+                      {spec.info.contact.name || spec.info.contact.email}
+                    </a>
+                  ) : spec.info.contact.url ? (
+                    <a href={spec.info.contact.url} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">
+                      {spec.info.contact.name || spec.info.contact.url}
+                    </a>
+                  ) : (
+                    <span>{spec.info.contact.name}</span>
+                  )}
+                </div>
+              )}
+              {spec?.info?.license && (
+                <div className="flex items-center gap-1.5">
+                  <span className="font-semibold text-[var(--text-muted)]">License:</span>
+                  {spec.info.license.url ? (
+                    <a href={spec.info.license.url} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">
+                      {spec.info.license.name}
+                    </a>
+                  ) : (
+                    <span>{spec.info.license.name}</span>
+                  )}
+                </div>
+              )}
+              {spec?.info?.termsOfService && (
+                <a href={spec.info.termsOfService} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">
+                  Terms of Service
+                </a>
+              )}
+              {spec?.externalDocs && (
+                <a href={spec.externalDocs.url} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">
+                  {spec.externalDocs.description || 'External Documentation'} ↗
+                </a>
+              )}
+            </div>
           </div>
 
           {/* Endpoints Documentation Reference */}
           {Object.entries(spec?.paths || {}).map(([path, pathItem]) => (
             <div key={path} className="space-y-10">
-              {(['get', 'post', 'put', 'delete', 'patch'] as const).map((method) => {
+              {(['get', 'post', 'put', 'delete', 'patch', 'options', 'head', 'trace'] as const).map((method) => {
                 const op = (pathItem as any)[method];
                 if (!op) return null;
+                const rawParams = [
+                  ...(pathItem.parameters || []),
+                  ...(op.parameters || []),
+                ];
+                const seen = new Set<string>();
+                const effectiveParams: any[] = [];
+                for (const p of rawParams) {
+                  const k = `${p.in}:${p.name}`;
+                  if (!seen.has(k)) {
+                    seen.add(k);
+                    effectiveParams.push(p);
+                  }
+                }
+                const effectiveOp = { ...op, parameters: effectiveParams };
                 const id = `doc-${method.toUpperCase()}-${path.replace(/\//g, '-')}`;
-                const snippet = generateSnippet(method, path, op);
+                const snippet = generateSnippet(method, path, effectiveOp);
 
                 const createdDate = op['x-created-at'] || op['created_at'];
                 const updatedDate = op['x-updated-at'] || op['updated_at'];

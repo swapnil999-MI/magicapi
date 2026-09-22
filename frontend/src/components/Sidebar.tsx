@@ -96,7 +96,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ style }) => {
     }> = [];
 
     for (const [path, pathItem] of Object.entries(spec.paths)) {
-      for (const method of ['get', 'post', 'put', 'delete', 'patch'] as const) {
+      for (const method of ['get', 'post', 'put', 'delete', 'patch', 'options', 'head', 'trace'] as const) {
         const op = (pathItem as any)[method];
         if (!op) continue;
 
@@ -212,6 +212,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ style }) => {
         return 'bg-red-500/15 text-red-400 border-red-500/30';
       case 'PATCH':
         return 'bg-purple-500/15 text-purple-400 border-purple-500/30';
+      case 'OPTIONS':
+        return 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30';
+      case 'HEAD':
+        return 'bg-teal-500/15 text-teal-400 border-teal-500/30';
+      case 'TRACE':
+        return 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30';
       default:
         return 'bg-blue-500/15 text-blue-400 border-blue-500/30';
     }

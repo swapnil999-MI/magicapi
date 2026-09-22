@@ -5,7 +5,7 @@
 BINARY_NAME=magicapi
 DOCKER_USER ?= swapnilmi
 IMAGE_NAME=$(DOCKER_USER)/magicapi
-VERSION ?= v1.0.0
+VERSION ?= v1.1.0
 
 .PHONY: all build build-frontend build-backend run test docker-build docker-run docker-push clean
 

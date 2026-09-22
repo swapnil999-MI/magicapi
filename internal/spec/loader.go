@@ -164,3 +164,83 @@ func (l *Loader) ResolveSchema(s *Schema) *Schema {
 	}
 	return s
 }
+
+func (l *Loader) ResolveParameter(p *Parameter) *Parameter {
+	if p == nil {
+		return nil
+	}
+	if p.Ref == "" {
+		return p
+	}
+
+	ref := strings.TrimPrefix(p.Ref, "#/components/parameters/")
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+
+	if l.spec != nil && l.spec.Components.Parameters != nil {
+		if target, ok := l.spec.Components.Parameters[ref]; ok {
+			return &target
+		}
+	}
+	return p
+}
+
+func (l *Loader) ResolveResponse(r *Response) *Response {
+	if r == nil {
+		return nil
+	}
+	if r.Ref == "" {
+		return r
+	}
+
+	ref := strings.TrimPrefix(r.Ref, "#/components/responses/")
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+
+	if l.spec != nil && l.spec.Components.Responses != nil {
+		if target, ok := l.spec.Components.Responses[ref]; ok {
+			return &target
+		}
+	}
+	return r
+}
+
+func (l *Loader) ResolveRequestBody(rb *RequestBody) *RequestBody {
+	if rb == nil {
+		return nil
+	}
+	if rb.Ref == "" {
+		return rb
+	}
+
+	ref := strings.TrimPrefix(rb.Ref, "#/components/requestBodies/")
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+
+	if l.spec != nil && l.spec.Components.RequestBodies != nil {
+		if target, ok := l.spec.Components.RequestBodies[ref]; ok {
+			return &target
+		}
+	}
+	return rb
+}
+
+func (l *Loader) ResolveHeader(h *Header) *Header {
+	if h == nil {
+		return nil
+	}
+	if h.Ref == "" {
+		return h
+	}
+
+	ref := strings.TrimPrefix(h.Ref, "#/components/headers/")
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+
+	if l.spec != nil && l.spec.Components.Headers != nil {
+		if target, ok := l.spec.Components.Headers[ref]; ok {
+			return &target
+		}
+	}
+	return h
+}

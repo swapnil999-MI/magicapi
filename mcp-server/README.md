@@ -30,7 +30,7 @@ High-performance Model Context Protocol (MCP) server engineered specifically for
 
 ### 1. Build the Binary
 ```bash
-go build -o bin/magicapi-mcp ./mcp-server/cmd/server/main.go
+go build -o bin/magicapi-mcp main.go
 ```
 
 ### 2. Start Unified Network Server (for team & remote access)

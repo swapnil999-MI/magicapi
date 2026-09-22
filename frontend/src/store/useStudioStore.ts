@@ -238,12 +238,27 @@ export const useStudioStore = create<StudioState>((set, get) => ({
   openEndpointInTab: (method, path, shouldSwitchToStudio = false) => {
     const state = get();
     const spec = state.spec;
-    const op = spec?.paths?.[path]?.[method.toLowerCase() as any];
+    const pathItem = spec?.paths?.[path];
+    const op = pathItem ? (pathItem as any)[method.toLowerCase()] : undefined;
     const env = state.environment.replace(/\/$/, '');
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
     const fullUrl = `${env}${cleanPath}`;
+
+    const rawParams = [
+      ...(pathItem?.parameters || []),
+      ...(op?.parameters || []),
+    ];
+    const seen = new Set<string>();
+    const allParams: any[] = [];
+    for (const p of rawParams) {
+      const k = `${p.in}:${p.name}`;
+      if (!seen.has(k)) {
+        seen.add(k);
+        allParams.push(p);
+      }
+    }
     
-    const queryParams = (op?.parameters || [])
+    const queryParams = allParams
       .filter((p: any) => p.in === 'query')
       .map((p: any) => ({
         key: p.name,

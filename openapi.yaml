@@ -2,10 +2,25 @@ openapi: 3.0.3
 info:
   title: MagicAPI Demo API
   version: 1.0.0
-  description: High-performance API documented with MagicAPI.
+  description: High-performance API documented with MagicAPI with full OpenAPI 3.0 support.
+  termsOfService: https://example.com/terms
+  contact:
+    name: MagicAPI Team
+    email: support@magicapi.dev
+    url: https://magicapi.dev/contact
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+externalDocs:
+  description: OpenAPI 3.0 Documentation Specification
+  url: https://spec.openapis.org/oas/v3.0.3
 servers:
 - url: http://localhost:8000/api/v1
   description: Local Development Server
+  variables:
+    env:
+      default: local
+      description: Target deployment environment
 - url: https://api.example.com/v1
   description: Production Server
 components:
@@ -14,6 +29,16 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    OAuth2Auth:
+      type: oauth2
+      description: OAuth2 authorization code flow
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.example.com/authorize
+          tokenUrl: https://auth.example.com/token
+          scopes:
+            read:users: Read user profile
+            write:users: Modify user data
 paths:
   /auth/login:
     post:
@@ -163,6 +188,16 @@ paths:
         '201':
           description: User created successfully
   /users/{id}:
+    summary: Single User Management
+    description: Operations on a specific user record
+    parameters:
+    - name: id
+      in: path
+      required: true
+      description: Unique user ID
+      schema:
+        type: string
+        example: usr_12345
     get:
       tags:
       - Users
@@ -170,14 +205,22 @@ paths:
       description: Fetch details of an existing user.
       x-created-at: '2026-08-20T10:00:00Z'
       x-updated-at: '2026-08-25T11:00:00Z'
-      parameters:
-      - name: id
-        in: path
-        required: true
-        description: Unique user ID
-        schema:
-          type: string
-          example: usr_12345
       responses:
         '200':
           description: User details
+    delete:
+      tags:
+      - Users
+      summary: Delete User
+      description: Remove user account.
+      responses:
+        '204':
+          description: User deleted
+    options:
+      tags:
+      - Users
+      summary: User Resource Options
+      description: Return allowed HTTP methods for user resource.
+      responses:
+        '200':
+          description: CORS Options response

@@ -28,7 +28,6 @@ RUN go mod download
 
 # Copy backend source code & embedded static files
 COPY internal/ ./internal/
-COPY docs.html index.html ./
 COPY main.go ./
 
 # Copy built frontend bundle from Stage 1 into /build/dist

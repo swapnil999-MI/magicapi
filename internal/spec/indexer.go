@@ -12,6 +12,9 @@ type Indexer struct {
 	byPathMethod map[string]*IndexedEndpoint
 	byTag        map[string][]IndexedEndpoint
 	schemas      map[string]*Schema
+	parameters   map[string]*Parameter
+	responses    map[string]*Response
+	secSchemes   map[string]*SecurityScheme
 	tags         []Tag
 }
 
@@ -20,6 +23,9 @@ func NewIndexer(spec *OpenAPISpec) *Indexer {
 		byPathMethod: make(map[string]*IndexedEndpoint),
 		byTag:        make(map[string][]IndexedEndpoint),
 		schemas:      make(map[string]*Schema),
+		parameters:   make(map[string]*Parameter),
+		responses:    make(map[string]*Response),
+		secSchemes:   make(map[string]*SecurityScheme),
 	}
 	if spec != nil {
 		idx.Reindex(spec)
@@ -35,10 +41,25 @@ func (idx *Indexer) Reindex(spec *OpenAPISpec) {
 	idx.byPathMethod = make(map[string]*IndexedEndpoint)
 	idx.byTag = make(map[string][]IndexedEndpoint)
 	idx.schemas = make(map[string]*Schema)
+	idx.parameters = make(map[string]*Parameter)
+	idx.responses = make(map[string]*Response)
+	idx.secSchemes = make(map[string]*SecurityScheme)
 	idx.tags = spec.Tags
 
 	for name, schema := range spec.Components.Schemas {
 		idx.schemas[name] = schema
+	}
+	for name, param := range spec.Components.Parameters {
+		pCopy := param
+		idx.parameters[name] = &pCopy
+	}
+	for name, resp := range spec.Components.Responses {
+		rCopy := resp
+		idx.responses[name] = &rCopy
+	}
+	for name, sec := range spec.Components.SecuritySchemes {
+		sCopy := sec
+		idx.secSchemes[name] = &sCopy
 	}
 
 	knownTags := make(map[string]bool)
@@ -48,6 +69,36 @@ func (idx *Indexer) Reindex(spec *OpenAPISpec) {
 
 	for path, item := range spec.Paths {
 		for method, op := range item.Operations() {
+			// Inherit path-level parameters into operation if not overridden
+			if len(item.Parameters) > 0 {
+				existingParams := make(map[string]bool)
+				for _, p := range op.Parameters {
+					existingParams[p.In+":"+p.Name] = true
+				}
+				var mergedParams []Parameter
+				for _, p := range item.Parameters {
+					if !existingParams[p.In+":"+p.Name] {
+						mergedParams = append(mergedParams, p)
+					}
+				}
+				mergedParams = append(mergedParams, op.Parameters...)
+				op.Parameters = mergedParams
+			}
+
+			// Inherit path-level or root-level servers if not defined on operation
+			if len(op.Servers) == 0 {
+				if len(item.Servers) > 0 {
+					op.Servers = item.Servers
+				} else if len(spec.Servers) > 0 {
+					op.Servers = spec.Servers
+				}
+			}
+
+			// Inherit root-level security if not defined on operation
+			if len(op.Security) == 0 && len(spec.Security) > 0 {
+				op.Security = spec.Security
+			}
+
 			ep := IndexedEndpoint{
 				Path:        path,
 				Method:      strings.ToUpper(method),
@@ -222,6 +273,27 @@ func (idx *Indexer) GetAllSchemas() map[string]*Schema {
 		out[k] = v
 	}
 	return out
+}
+
+func (idx *Indexer) GetParameter(name string) (*Parameter, bool) {
+	idx.mu.RLock()
+	defer idx.mu.RUnlock()
+	p, ok := idx.parameters[name]
+	return p, ok
+}
+
+func (idx *Indexer) GetResponse(name string) (*Response, bool) {
+	idx.mu.RLock()
+	defer idx.mu.RUnlock()
+	r, ok := idx.responses[name]
+	return r, ok
+}
+
+func (idx *Indexer) GetSecurityScheme(name string) (*SecurityScheme, bool) {
+	idx.mu.RLock()
+	defer idx.mu.RUnlock()
+	s, ok := idx.secSchemes[name]
+	return s, ok
 }
 
 func normalizePath(p string) string {
