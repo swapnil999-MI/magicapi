@@ -12,7 +12,7 @@ import { VariablesModal } from './components/VariablesModal';
 import { TypeGeneratorModal } from './components/TypeGeneratorModal';
 import { LoadTesterModal } from './components/LoadTesterModal';
 import { ScenarioRunnerModal } from './components/ScenarioRunnerModal';
-import { Rocket, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 
 export function App() {
   const { viewMode, setViewMode, fetchSpec, theme, isLoadingSpec, specError } = useStudioStore();
@@ -122,7 +122,7 @@ export function App() {
         {isLoadingSpec ? (
           <div className="flex flex-col items-center justify-center flex-1 gap-3 text-[var(--text-muted)]">
             <div className="w-12 h-12 rounded-xl bg-white p-1.5 shadow-lg shadow-purple-500/20 ring-2 ring-purple-400/30 animate-pulse">
-              <img src="/magicapi-logo.png" alt="MagicAPI" className="w-full h-full object-contain" />
+              <img src="/icon-512.png" alt="MagicAPI" className="w-full h-full object-contain" />
             </div>
             <span className="text-xs font-mono font-semibold text-purple-300">Loading MagicAPI Studio...</span>
           </div>

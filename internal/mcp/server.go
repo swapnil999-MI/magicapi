@@ -26,6 +26,11 @@ func NewServer(loader *spec.Loader, indexer *spec.Indexer) *Server {
 	}
 }
 
+// ToolCount returns the number of registered MCP tools.
+func (s *Server) ToolCount() int {
+	return len(s.tools.ListTools())
+}
+
 func (s *Server) HandleMessage(req *JSONRPCMessage) *JSONRPCMessage {
 	if req == nil {
 		return nil

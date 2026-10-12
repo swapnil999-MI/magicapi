@@ -12,9 +12,6 @@ type Config struct {
 	Port        string
 	Mode        string // "network" or "stdio"
 	EnableHTTP3 bool
-	TLSCertPath string
-	TLSKeyPath  string
-	AutoTLS     bool
 	CorsOrigins string
 }
 
@@ -32,9 +29,6 @@ func LoadConfig() *Config {
 		Port:        getFirstEnvOrDefault("PORT", "8085"),
 		Mode:        getFirstEnvOrDefault("MODE", "network"),
 		EnableHTTP3: getEnvBool("ENABLE_HTTP3", true),
-		TLSCertPath: getFirstEnv("TLS_CERT", "TLS_CERT_PATH"),
-		TLSKeyPath:  getFirstEnv("TLS_KEY", "TLS_KEY_PATH"),
-		AutoTLS:     getEnvBool("AUTO_TLS", true),
 		CorsOrigins: getFirstEnvOrDefault("CORS_ORIGINS", "*"),
 	}
 
@@ -43,8 +37,6 @@ func LoadConfig() *Config {
 	hostFlag := flag.String("host", cfg.Host, "Host for unified network server")
 	specFlag := flag.String("spec", cfg.SpecPath, "Path or URL to openapi.yaml or openapi.json")
 	http3Flag := flag.Bool("http3", cfg.EnableHTTP3, "Enable HTTP/3 (QUIC) support on same port")
-	certFlag := flag.String("cert", cfg.TLSCertPath, "TLS Certificate file path")
-	keyFlag := flag.String("key", cfg.TLSKeyPath, "TLS Key file path")
 
 	// Parse flags only if not already parsed
 	if !flag.Parsed() {
@@ -58,8 +50,6 @@ func LoadConfig() *Config {
 	cfg.Host = *hostFlag
 	cfg.SpecPath = *specFlag
 	cfg.EnableHTTP3 = *http3Flag
-	cfg.TLSCertPath = *certFlag
-	cfg.TLSKeyPath = *keyFlag
 
 	return cfg
 }

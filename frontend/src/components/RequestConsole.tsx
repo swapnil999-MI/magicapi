@@ -14,7 +14,6 @@ import {
   FlaskConical,
   Activity,
   FileCode,
-  Workflow,
   Sliders,
 } from 'lucide-react';
 import type { RequestAssertion } from '../types/openapi';
@@ -45,16 +44,13 @@ export const RequestConsole: React.FC<RequestConsoleProps> = ({ style }) => {
     spec,
     setTypeModalOpen,
     setLoadTesterOpen,
-    setScenarioModalOpen,
   } = useStudioStore();
 
   const tab = tabs.find((t) => t.id === activeTabId);
-  if (!tab) return null;
 
-  const op = spec?.paths?.[tab.path]?.[tab.method.toLowerCase() as any];
-
-  // ⌘+Enter shortcut to send
+  // ⌘+Enter shortcut to send (hooks must run before the early return below)
   useEffect(() => {
+    if (!tab) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
         e.preventDefault();
@@ -64,6 +60,10 @@ export const RequestConsole: React.FC<RequestConsoleProps> = ({ style }) => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [tab]);
+
+  if (!tab) return null;
+
+  const op = spec?.paths?.[tab.path]?.[tab.method.toLowerCase() as any];
 
   const handleSend = async () => {
     setIsSending(true);

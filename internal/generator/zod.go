@@ -23,10 +23,7 @@ func (zg *ZodGenerator) GenerateEndpointZod(ep *spec.IndexedEndpoint) string {
 	var sb strings.Builder
 	sb.WriteString("import { z } from 'zod';\n\n")
 
-	baseName := sanitizeIdentifier(ep.OperationID)
-	if baseName == "" {
-		baseName = sanitizeIdentifier(ep.Method + "_" + strings.ReplaceAll(ep.Path, "/", "_"))
-	}
+	baseName := endpointBaseName(ep)
 
 	for _, media := range ep.Operation.RequestBody.Content {
 		if media.Schema != nil {
@@ -96,7 +93,7 @@ func (zg *ZodGenerator) schemaToZod(s *spec.Schema, depth int) string {
 			rules = append(rules, ".uuid({ message: 'Invalid UUID' })")
 		}
 		if resolved.Pattern != "" {
-			rules = append(rules, fmt.Sprintf(".regex(/%s/, { message: 'Invalid format' })", resolved.Pattern))
+			rules = append(rules, fmt.Sprintf(".regex(/%s/, { message: 'Invalid format' })", escapeRegexLiteral(resolved.Pattern)))
 		}
 		return strings.Join(rules, "")
 
@@ -143,11 +140,29 @@ func (zg *ZodGenerator) schemaToZod(s *spec.Schema, depth int) string {
 			if !reqMap[propName] {
 				propZod += ".optional()"
 			}
-			fields = append(fields, fmt.Sprintf("%s%s: %s,", indent, propName, propZod))
+			fields = append(fields, fmt.Sprintf("%s%s: %s,", indent, tsPropertyKey(propName), propZod))
 		}
 		return fmt.Sprintf("z.object({\n%s\n%s})", strings.Join(fields, "\n"), closeIndent)
 
 	default:
 		return "z.any()"
 	}
+}
+
+// escapeRegexLiteral escapes unescaped '/' so a pattern can be embedded in a JS /.../ literal.
+func escapeRegexLiteral(pattern string) string {
+	var sb strings.Builder
+	escaped := false
+	for _, r := range pattern {
+		switch {
+		case escaped:
+			escaped = false
+		case r == '\\':
+			escaped = true
+		case r == '/':
+			sb.WriteRune('\\')
+		}
+		sb.WriteRune(r)
+	}
+	return sb.String()
 }

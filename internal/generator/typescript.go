@@ -2,6 +2,9 @@ package generator
 
 import (
 	"fmt"
+	"regexp"
+	"sort"
+	"strconv"
 	"strings"
 
 	"openapi-doc-studio/internal/spec"
@@ -21,8 +24,7 @@ func (g *TSGenerator) GenerateSchemaTypes(name string, s *spec.Schema) string {
 	}
 
 	var sb strings.Builder
-	visited := make(map[string]bool)
-	g.generateTypeRecursive(&sb, name, s, visited, 0)
+	g.generateTypeRecursive(&sb, name, s, 0)
 	return sb.String()
 }
 
@@ -32,10 +34,7 @@ func (g *TSGenerator) GenerateEndpointTypes(ep *spec.IndexedEndpoint) string {
 	}
 
 	var sb strings.Builder
-	baseName := sanitizeIdentifier(ep.OperationID)
-	if baseName == "" {
-		baseName = sanitizeIdentifier(ep.Method + "_" + strings.ReplaceAll(ep.Path, "/", "_"))
-	}
+	baseName := endpointBaseName(ep)
 
 	sb.WriteString(fmt.Sprintf("/**\n * Types for %s %s\n", ep.Method, ep.Path))
 	if ep.Summary != "" {
@@ -43,7 +42,7 @@ func (g *TSGenerator) GenerateEndpointTypes(ep *spec.IndexedEndpoint) string {
 	}
 	sb.WriteString(" */\n\n")
 
-	// 1. Path & Query Parameters Type
+	// 1. Path & Query Parameters Type (always emitted: client code references it)
 	if len(ep.Operation.Parameters) > 0 {
 		sb.WriteString(fmt.Sprintf("export interface %sParams {\n", baseName))
 		for _, p := range ep.Operation.Parameters {
@@ -58,42 +57,76 @@ func (g *TSGenerator) GenerateEndpointTypes(ep *spec.IndexedEndpoint) string {
 			if p.Description != "" {
 				sb.WriteString(fmt.Sprintf("  /** %s (%s) */\n", p.Description, p.In))
 			}
-			sb.WriteString(fmt.Sprintf("  %s%s: %s;\n", p.Name, optional, paramType))
+			sb.WriteString(fmt.Sprintf("  %s%s: %s;\n", tsPropertyKey(p.Name), optional, paramType))
 		}
 		sb.WriteString("}\n\n")
+	} else {
+		sb.WriteString(fmt.Sprintf("export type %sParams = Record<string, never>;\n\n", baseName))
 	}
 
 	// 2. Request Body Type
 	if ep.Operation.RequestBody != nil {
+		requestType := "unknown"
 		for _, media := range ep.Operation.RequestBody.Content {
 			if media.Schema != nil {
-				resolved := g.loader.ResolveSchema(media.Schema)
-				typeName := baseName + "Request"
-				sb.WriteString(fmt.Sprintf("export type %s = %s;\n\n", typeName, g.schemaToTSType(resolved, 0)))
+				requestType = g.schemaToTSType(g.loader.ResolveSchema(media.Schema), 0)
 				break
 			}
 		}
+		sb.WriteString(fmt.Sprintf("export type %sRequest = %s;\n\n", baseName, requestType))
 	}
 
-	// 3. Response Types
-	for code, resp := range ep.Operation.Responses {
+	// 3. Response Types: the primary success response is named <Base>Response,
+	// every other documented response gets a status-code suffix.
+	codes := make([]string, 0, len(ep.Operation.Responses))
+	for code := range ep.Operation.Responses {
+		codes = append(codes, code)
+	}
+	sort.Strings(codes)
+	primary := primarySuccessCode(codes)
+	primaryEmitted := false
+
+	for _, code := range codes {
+		resp := ep.Operation.Responses[code]
 		for _, media := range resp.Content {
 			if media.Schema != nil {
 				resolved := g.loader.ResolveSchema(media.Schema)
-				typeName := fmt.Sprintf("%sResponse%s", baseName, code)
-				if code == "200" || code == "201" {
+				typeName := baseName + "Response" + sanitizeIdentifier(code)
+				if code == primary {
 					typeName = baseName + "Response"
+					primaryEmitted = true
 				}
 				sb.WriteString(fmt.Sprintf("export type %s = %s;\n\n", typeName, g.schemaToTSType(resolved, 0)))
 				break
 			}
 		}
 	}
+	if !primaryEmitted {
+		sb.WriteString(fmt.Sprintf("export type %sResponse = void;\n\n", baseName))
+	}
 
 	return sb.String()
 }
 
-func (g *TSGenerator) generateTypeRecursive(sb *strings.Builder, name string, s *spec.Schema, visited map[string]bool, depth int) {
+// primarySuccessCode picks the response code used for <Base>Response:
+// 200, then 201, then the lowest other 2xx code. codes must be sorted.
+func primarySuccessCode(codes []string) string {
+	for _, preferred := range []string{"200", "201"} {
+		for _, c := range codes {
+			if c == preferred {
+				return c
+			}
+		}
+	}
+	for _, c := range codes {
+		if strings.HasPrefix(c, "2") {
+			return c
+		}
+	}
+	return ""
+}
+
+func (g *TSGenerator) generateTypeRecursive(sb *strings.Builder, name string, s *spec.Schema, depth int) {
 	if s == nil {
 		return
 	}
@@ -145,7 +178,7 @@ func (g *TSGenerator) generateTypeRecursive(sb *strings.Builder, name string, s 
 				sb.WriteString(fmt.Sprintf("  /** %s */\n", propSchema.Description))
 			}
 			propType := g.schemaToTSType(propSchema, depth+1)
-			sb.WriteString(fmt.Sprintf("  %s%s: %s;\n", propName, optional, propType))
+			sb.WriteString(fmt.Sprintf("  %s%s: %s;\n", tsPropertyKey(propName), optional, propType))
 		}
 		sb.WriteString("}\n\n")
 		return
@@ -221,12 +254,31 @@ func (g *TSGenerator) schemaToTSType(s *spec.Schema, depth int) string {
 			if reqSet[k] {
 				opt = ""
 			}
-			props = append(props, fmt.Sprintf("%s%s: %s", k, opt, g.schemaToTSType(p, depth+1)))
+			props = append(props, fmt.Sprintf("%s%s: %s", tsPropertyKey(k), opt, g.schemaToTSType(p, depth+1)))
 		}
 		return "{\n  " + strings.Join(props, ";\n  ") + "\n}"
 	default:
 		return "any"
 	}
+}
+
+// endpointBaseName returns the identifier prefix for an endpoint's generated
+// types and functions, derived from operationId or, failing that, method + path.
+func endpointBaseName(ep *spec.IndexedEndpoint) string {
+	if strings.TrimSpace(ep.OperationID) != "" {
+		return sanitizeIdentifier(ep.OperationID)
+	}
+	return sanitizeIdentifier(strings.ToLower(ep.Method) + "_" + strings.ReplaceAll(ep.Path, "/", "_"))
+}
+
+var tsIdentifierRe = regexp.MustCompile(`^[A-Za-z_$][A-Za-z0-9_$]*$`)
+
+// tsPropertyKey quotes property names that are not valid TS identifiers (e.g. "X-Request-Id").
+func tsPropertyKey(name string) string {
+	if tsIdentifierRe.MatchString(name) {
+		return name
+	}
+	return strconv.Quote(name)
 }
 
 func sanitizeIdentifier(s string) string {

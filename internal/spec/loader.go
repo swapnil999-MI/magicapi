@@ -15,6 +15,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var remoteSpecClient = &http.Client{Timeout: 30 * time.Second}
+
 type Loader struct {
 	specPath     string
 	mu           sync.RWMutex
@@ -56,11 +58,15 @@ func (l *Loader) Reload() error {
 	var err error
 
 	if strings.HasPrefix(l.specPath, "http://") || strings.HasPrefix(l.specPath, "https://") {
-		resp, httpErr := http.Get(l.specPath)
+		resp, httpErr := remoteSpecClient.Get(l.specPath)
 		if httpErr != nil {
 			return fmt.Errorf("failed to fetch remote spec from %s: %w", l.specPath, httpErr)
 		}
 		defer resp.Body.Close()
+		// Never replace the current spec with an error page
+		if resp.StatusCode < 200 || resp.StatusCode > 299 {
+			return fmt.Errorf("failed to fetch remote spec from %s: HTTP %s", l.specPath, resp.Status)
+		}
 		data, err = io.ReadAll(resp.Body)
 		if err != nil {
 			return fmt.Errorf("failed to read remote spec response: %w", err)
@@ -84,6 +90,9 @@ func (l *Loader) Reload() error {
 		if jsonErr := json.Unmarshal(data, &parsed); jsonErr != nil {
 			return fmt.Errorf("failed to parse spec as YAML (%v) or JSON (%v)", err, jsonErr)
 		}
+	}
+	if parsed.OpenAPI == "" && len(parsed.Paths) == 0 {
+		return fmt.Errorf("document at %s is not an OpenAPI specification (no 'openapi' version or paths)", l.specPath)
 	}
 
 	l.mu.Lock()
@@ -163,84 +172,4 @@ func (l *Loader) ResolveSchema(s *Schema) *Schema {
 		}
 	}
 	return s
-}
-
-func (l *Loader) ResolveParameter(p *Parameter) *Parameter {
-	if p == nil {
-		return nil
-	}
-	if p.Ref == "" {
-		return p
-	}
-
-	ref := strings.TrimPrefix(p.Ref, "#/components/parameters/")
-	l.mu.RLock()
-	defer l.mu.RUnlock()
-
-	if l.spec != nil && l.spec.Components.Parameters != nil {
-		if target, ok := l.spec.Components.Parameters[ref]; ok {
-			return &target
-		}
-	}
-	return p
-}
-
-func (l *Loader) ResolveResponse(r *Response) *Response {
-	if r == nil {
-		return nil
-	}
-	if r.Ref == "" {
-		return r
-	}
-
-	ref := strings.TrimPrefix(r.Ref, "#/components/responses/")
-	l.mu.RLock()
-	defer l.mu.RUnlock()
-
-	if l.spec != nil && l.spec.Components.Responses != nil {
-		if target, ok := l.spec.Components.Responses[ref]; ok {
-			return &target
-		}
-	}
-	return r
-}
-
-func (l *Loader) ResolveRequestBody(rb *RequestBody) *RequestBody {
-	if rb == nil {
-		return nil
-	}
-	if rb.Ref == "" {
-		return rb
-	}
-
-	ref := strings.TrimPrefix(rb.Ref, "#/components/requestBodies/")
-	l.mu.RLock()
-	defer l.mu.RUnlock()
-
-	if l.spec != nil && l.spec.Components.RequestBodies != nil {
-		if target, ok := l.spec.Components.RequestBodies[ref]; ok {
-			return &target
-		}
-	}
-	return rb
-}
-
-func (l *Loader) ResolveHeader(h *Header) *Header {
-	if h == nil {
-		return nil
-	}
-	if h.Ref == "" {
-		return h
-	}
-
-	ref := strings.TrimPrefix(h.Ref, "#/components/headers/")
-	l.mu.RLock()
-	defer l.mu.RUnlock()
-
-	if l.spec != nil && l.spec.Components.Headers != nil {
-		if target, ok := l.spec.Components.Headers[ref]; ok {
-			return &target
-		}
-	}
-	return h
 }

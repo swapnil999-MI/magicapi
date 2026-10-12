@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStudioStore } from '../store/useStudioStore';
-import { X, Play, Plus, Trash2, CheckCircle2, XCircle, Clock, Workflow, ArrowDown, Sparkles, Layers } from 'lucide-react';
+import { X, Play, Plus, Trash2, CheckCircle2, XCircle, Workflow, ArrowDown } from 'lucide-react';
 
 interface ScenarioStep {
   id: string;
@@ -16,7 +16,7 @@ interface ScenarioStep {
 }
 
 export const ScenarioRunnerModal: React.FC = () => {
-  const { isScenarioModalOpen, setScenarioModalOpen, spec, variables, setVariable, interpolate } = useStudioStore();
+  const { isScenarioModalOpen, setScenarioModalOpen, spec, setVariable, interpolate } = useStudioStore();
 
   const [steps, setSteps] = useState<ScenarioStep[]>([
     {

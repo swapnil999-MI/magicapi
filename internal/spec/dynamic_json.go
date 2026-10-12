@@ -83,7 +83,7 @@ func (da *DynamicAnalyzer) ExtractVariantSchema(ep *IndexedEndpoint, discriminat
 	}
 
 	cleanField := strings.TrimSpace(discriminatorField)
-	cleanValue := strings.TrimSpace(strings.ToUpper(variantValue))
+	cleanValue := strings.TrimSpace(variantValue)
 
 	for _, media := range ep.Operation.RequestBody.Content {
 		if media.Schema == nil {
@@ -94,52 +94,74 @@ func (da *DynamicAnalyzer) ExtractVariantSchema(ep *IndexedEndpoint, discriminat
 			continue
 		}
 
-		// Check oneOf / anyOf
-		candidates := append(root.OneOf, root.AnyOf...)
-		for _, variant := range candidates {
-			resolvedVariant := da.loader.ResolveSchema(variant)
-			if resolvedVariant == nil {
-				continue
-			}
-
-			// Check if this variant has discriminator property matching value
-			for pName, pSchema := range resolvedVariant.Properties {
-				if strings.EqualFold(pName, cleanField) {
-					if len(pSchema.Enum) > 0 {
-						for _, e := range pSchema.Enum {
-							if strings.EqualFold(fmt.Sprintf("%v", e), cleanValue) {
-								return resolvedVariant, generateExampleMap(resolvedVariant), nil
-							}
-						}
-					}
-					if fmt.Sprintf("%v", pSchema.Default) == cleanValue || fmt.Sprintf("%v", pSchema.Example) == cleanValue {
-						return resolvedVariant, generateExampleMap(resolvedVariant), nil
-					}
-				}
-			}
+		// Check root-level oneOf / anyOf
+		if v := da.findVariant(root, cleanField, cleanValue); v != nil {
+			return v, generateExampleMap(v), nil
 		}
 
-		// Check child property oneOf
+		// Check child property oneOf / anyOf; the field may be given as "prop.field"
 		for propName, propSchema := range root.Properties {
 			resolvedProp := da.loader.ResolveSchema(propSchema)
 			if resolvedProp == nil {
 				continue
 			}
-			candidates := append(resolvedProp.OneOf, resolvedProp.AnyOf...)
-			for _, variant := range candidates {
-				resolvedVariant := da.loader.ResolveSchema(variant)
-				if resolvedVariant != nil {
-					for pName := range resolvedVariant.Properties {
-						if strings.EqualFold(pName, cleanField) || strings.EqualFold(propName+"."+pName, cleanField) {
-							return resolvedVariant, generateExampleMap(resolvedVariant), nil
-						}
-					}
-				}
+			field := cleanField
+			if prefix := propName + "."; len(field) > len(prefix) && strings.EqualFold(field[:len(prefix)], prefix) {
+				field = field[len(prefix):]
+			}
+			if v := da.findVariant(resolvedProp, field, cleanValue); v != nil {
+				return v, generateExampleMap(v), nil
 			}
 		}
 	}
 
 	return nil, nil, fmt.Errorf("variant %s for discriminator %s not found in endpoint schema", variantValue, discriminatorField)
+}
+
+// findVariant returns the oneOf/anyOf member of s whose discriminator field equals value.
+func (da *DynamicAnalyzer) findVariant(s *Schema, field, value string) *Schema {
+	// Explicit discriminator mapping takes precedence
+	if s.Discriminator != nil && strings.EqualFold(s.Discriminator.PropertyName, field) {
+		for key, ref := range s.Discriminator.Mapping {
+			if strings.EqualFold(key, value) {
+				if target := da.loader.ResolveSchema(&Schema{Ref: ref}); target != nil && target.Ref == "" {
+					return target
+				}
+			}
+		}
+	}
+
+	candidates := make([]*Schema, 0, len(s.OneOf)+len(s.AnyOf))
+	candidates = append(candidates, s.OneOf...)
+	candidates = append(candidates, s.AnyOf...)
+	for _, variant := range candidates {
+		resolvedVariant := da.loader.ResolveSchema(variant)
+		if resolvedVariant == nil {
+			continue
+		}
+		for pName, pSchema := range resolvedVariant.Properties {
+			if strings.EqualFold(pName, field) && propertyAllowsValue(da.loader.ResolveSchema(pSchema), value) {
+				return resolvedVariant
+			}
+		}
+	}
+	return nil
+}
+
+// propertyAllowsValue reports whether a discriminator property is pinned to value via enum, default or example.
+func propertyAllowsValue(p *Schema, value string) bool {
+	if p == nil {
+		return false
+	}
+	for _, e := range p.Enum {
+		if strings.EqualFold(fmt.Sprintf("%v", e), value) {
+			return true
+		}
+	}
+	if p.Default != nil && strings.EqualFold(fmt.Sprintf("%v", p.Default), value) {
+		return true
+	}
+	return p.Example != nil && strings.EqualFold(fmt.Sprintf("%v", p.Example), value)
 }
 
 func (da *DynamicAnalyzer) extractDiscriminatorDependency(s *Schema, disc *Discriminator) FieldDependency {

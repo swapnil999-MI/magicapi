@@ -5,7 +5,8 @@
 BINARY_NAME=magicapi
 DOCKER_USER ?= swapnilmi
 IMAGE_NAME=$(DOCKER_USER)/magicapi
-VERSION ?= v1.1.0
+VERSION ?= v1.1.1
+PLATFORMS ?= linux/amd64,linux/arm64
 
 .PHONY: all build build-frontend build-backend run test docker-build docker-run docker-push clean
 
@@ -43,12 +44,11 @@ docker-run:
 	@echo "🚀 Running MagicAPI in Docker container on port 8085..."
 	@docker run -d --rm -p 8085:8085 -p 8085:8085/udp -v $(PWD)/openapi.yaml:/app/openapi.yaml:ro --name magicapi-studio $(IMAGE_NAME):latest
 
-# 8. Push to Docker Hub
-docker-push: docker-build
-	@echo "⬆️  Pushing $(IMAGE_NAME) to Docker Hub..."
-	@docker push $(IMAGE_NAME):$(VERSION)
-	@docker push $(IMAGE_NAME):latest
-	@echo "✅ Published $(IMAGE_NAME):latest to Docker Hub!"
+# 8. Build multi-arch image and push to Docker Hub
+docker-push:
+	@echo "⬆️  Building $(PLATFORMS) and pushing $(IMAGE_NAME) to Docker Hub..."
+	@docker buildx build --platform $(PLATFORMS) -t $(IMAGE_NAME):latest -t $(IMAGE_NAME):$(VERSION) --push .
+	@echo "✅ Published $(IMAGE_NAME):$(VERSION) and :latest to Docker Hub!"
 
 # 9. Clean artifacts
 clean:

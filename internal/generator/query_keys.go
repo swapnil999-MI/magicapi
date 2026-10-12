@@ -23,7 +23,7 @@ func (qkg *QueryKeyGenerator) GenerateQueryKeyFactory(tagFilter string) string {
 	tagMap := make(map[string][]spec.IndexedEndpoint)
 
 	for _, tag := range categories {
-		endpoints := qkg.indexer.Search("", tag.Name, "", 100)
+		endpoints := qkg.indexer.EndpointsByTag(tag.Name)
 		if len(endpoints) > 0 {
 			tagMap[tag.Name] = endpoints
 		}

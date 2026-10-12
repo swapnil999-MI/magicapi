@@ -395,7 +395,7 @@ func (tr *ToolRegistry) handleListCategories(args map[string]any) (*ToolCallResu
 	sb.WriteString("| Category / Tag | Description | Endpoints Count |\n|---|---|---|\n")
 
 	for _, c := range categories {
-		eps := tr.indexer.Search("", c.Name, "", 200)
+		eps := tr.indexer.EndpointsByTag(c.Name)
 		sb.WriteString(fmt.Sprintf("| **%s** | %s | %d endpoints |\n", c.Name, c.Description, len(eps)))
 	}
 

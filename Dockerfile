@@ -18,7 +18,11 @@ RUN bun run build
 # ==========================================
 # Stage 2: Compile Unified Go Server Binary
 # ==========================================
-FROM golang:alpine AS backend-builder
+FROM --platform=$BUILDPLATFORM golang:alpine AS backend-builder
+
+# Cross-compile for the target platform natively instead of under emulation
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /build
 
@@ -35,7 +39,7 @@ COPY --from=frontend-builder /build/dist ./dist
 
 # Compile standalone static binary with optimizations and UPX compression
 RUN apk add --no-cache upx && \
-    CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-w -s" -o /app/magicapi main.go && \
+    CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -trimpath -ldflags="-w -s" -o /app/magicapi main.go && \
     upx --best --lzma /app/magicapi
 
 # ==========================================

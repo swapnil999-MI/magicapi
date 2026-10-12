@@ -18,10 +18,7 @@ func (mg *MediaGenerator) Generate(ep *spec.IndexedEndpoint) string {
 		return "// Endpoint not found"
 	}
 
-	baseName := sanitizeIdentifier(ep.OperationID)
-	if baseName == "" {
-		baseName = sanitizeIdentifier(ep.Method + "_" + strings.ReplaceAll(ep.Path, "/", "_"))
-	}
+	baseName := endpointBaseName(ep)
 	urlFormatted := formatPathForJS(ep.Path)
 
 	isUpload := false

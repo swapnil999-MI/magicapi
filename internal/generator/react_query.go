@@ -36,10 +36,7 @@ func (cg *ClientCodeGenerator) Generate(ep *spec.IndexedEndpoint, framework stri
 }
 
 func (cg *ClientCodeGenerator) generateReactQuery(ep *spec.IndexedEndpoint) string {
-	baseName := sanitizeIdentifier(ep.OperationID)
-	if baseName == "" {
-		baseName = sanitizeIdentifier(ep.Method + "_" + strings.ReplaceAll(ep.Path, "/", "_"))
-	}
+	baseName := endpointBaseName(ep)
 	hookPrefix := "use" + baseName
 	hasBody := ep.Method == "POST" || ep.Method == "PUT" || ep.Method == "PATCH" || ep.Method == "DELETE"
 	urlFormatted := formatPathForJS(ep.Path)
@@ -60,16 +57,21 @@ func (cg *ClientCodeGenerator) generateReactQuery(ep *spec.IndexedEndpoint) stri
 	sb.WriteString(fmt.Sprintf("): Promise<%sResponse> => {\n", baseName))
 	sb.WriteString(fmt.Sprintf("  const url = `%s`;\n", urlFormatted))
 	sb.WriteString(fmt.Sprintf("  const response = await axios.%s<%sResponse>(url", strings.ToLower(ep.Method), baseName))
-	if hasBody && ep.Operation.RequestBody != nil {
-		sb.WriteString(", data")
+	switch {
+	case hasBody && ep.Operation.RequestBody != nil && ep.Method == "DELETE":
+		// axios.delete(url, config) has no data argument; the body goes in config.data
+		sb.WriteString(", { data, params });\n")
+	case hasBody && ep.Operation.RequestBody != nil:
+		sb.WriteString(", data, { params });\n")
+	default:
+		sb.WriteString(", { params });\n")
 	}
-	sb.WriteString(", { params });\n")
 	sb.WriteString("  return response.data;\n};\n\n")
 
 	// React Query Hook
 	if !hasBody && ep.Method == "GET" {
 		sb.WriteString(fmt.Sprintf("export const %s = (params: %sParams, enabled: boolean = true) => {\n", hookPrefix, baseName))
-		sb.WriteString(fmt.Sprintf("  return useQuery({\n"))
+		sb.WriteString("  return useQuery({\n")
 		sb.WriteString(fmt.Sprintf("    queryKey: ['%s', params],\n", strings.ToLower(baseName)))
 		sb.WriteString(fmt.Sprintf("    queryFn: () => %sApi(params),\n", uncapitalize(baseName)))
 		sb.WriteString("    enabled: enabled && !!params,\n")
@@ -78,11 +80,15 @@ func (cg *ClientCodeGenerator) generateReactQuery(ep *spec.IndexedEndpoint) stri
 	} else {
 		sb.WriteString(fmt.Sprintf("export const %s = () => {\n", hookPrefix))
 		sb.WriteString("  const queryClient = useQueryClient();\n\n")
-		sb.WriteString(fmt.Sprintf("  return useMutation({\n"))
-		sb.WriteString(fmt.Sprintf("    mutationFn: (variables: { params: %sParams; data%s: %sRequest }) =>\n", baseName, optionalColon(ep.Operation.RequestBody == nil), baseName))
+		sb.WriteString("  return useMutation({\n")
+		variablesType := fmt.Sprintf("{ params: %sParams }", baseName)
+		if ep.Operation.RequestBody != nil {
+			variablesType = fmt.Sprintf("{ params: %sParams; data: %sRequest }", baseName, baseName)
+		}
+		sb.WriteString(fmt.Sprintf("    mutationFn: (variables: %s) =>\n", variablesType))
 		sb.WriteString(fmt.Sprintf("      %sApi(variables.params%s),\n", uncapitalize(baseName), dataParamIfBody(ep.Operation.RequestBody != nil)))
 		sb.WriteString("    onSuccess: (data) => {\n")
-		sb.WriteString(fmt.Sprintf("      // Invalidate relevant queries upon mutation\n"))
+		sb.WriteString("      // Invalidate relevant queries upon mutation\n")
 		sb.WriteString(fmt.Sprintf("      queryClient.invalidateQueries({ queryKey: ['%s'] });\n", strings.ToLower(baseName)))
 		sb.WriteString("    },\n")
 		sb.WriteString("  });\n};\n")
@@ -92,10 +98,7 @@ func (cg *ClientCodeGenerator) generateReactQuery(ep *spec.IndexedEndpoint) stri
 }
 
 func (cg *ClientCodeGenerator) generateSWR(ep *spec.IndexedEndpoint) string {
-	baseName := sanitizeIdentifier(ep.OperationID)
-	if baseName == "" {
-		baseName = sanitizeIdentifier(ep.Method + "_" + strings.ReplaceAll(ep.Path, "/", "_"))
-	}
+	baseName := endpointBaseName(ep)
 	urlFormatted := formatPathForJS(ep.Path)
 
 	var sb strings.Builder
@@ -103,7 +106,7 @@ func (cg *ClientCodeGenerator) generateSWR(ep *spec.IndexedEndpoint) string {
 	sb.WriteString(cg.tsGen.GenerateEndpointTypes(ep))
 	sb.WriteString("\n")
 
-	sb.WriteString(fmt.Sprintf("const fetcher = (url: string) => axios.get(url).then(res => res.data);\n\n"))
+	sb.WriteString("const fetcher = (url: string) => axios.get(url).then(res => res.data);\n\n")
 	sb.WriteString(fmt.Sprintf("export const use%s = (params: %sParams) => {\n", baseName, baseName))
 	sb.WriteString(fmt.Sprintf("  const url = `%s`;\n", urlFormatted))
 	sb.WriteString(fmt.Sprintf("  return useSWR<%sResponse>(url, fetcher);\n};\n", baseName))
@@ -111,7 +114,7 @@ func (cg *ClientCodeGenerator) generateSWR(ep *spec.IndexedEndpoint) string {
 }
 
 func (cg *ClientCodeGenerator) generateAxios(ep *spec.IndexedEndpoint) string {
-	baseName := sanitizeIdentifier(ep.OperationID)
+	baseName := endpointBaseName(ep)
 	urlFormatted := formatPathForJS(ep.Path)
 	var sb strings.Builder
 	sb.WriteString("import axios, { AxiosRequestConfig } from 'axios';\n\n")
@@ -126,7 +129,7 @@ func (cg *ClientCodeGenerator) generateAxios(ep *spec.IndexedEndpoint) string {
 }
 
 func (cg *ClientCodeGenerator) generateFetch(ep *spec.IndexedEndpoint) string {
-	baseName := sanitizeIdentifier(ep.OperationID)
+	baseName := endpointBaseName(ep)
 	urlFormatted := formatPathForJS(ep.Path)
 	var sb strings.Builder
 	sb.WriteString(cg.tsGen.GenerateEndpointTypes(ep))
@@ -145,7 +148,7 @@ func (cg *ClientCodeGenerator) generateFetch(ep *spec.IndexedEndpoint) string {
 }
 
 func (cg *ClientCodeGenerator) generateServerAction(ep *spec.IndexedEndpoint) string {
-	baseName := sanitizeIdentifier(ep.OperationID)
+	baseName := endpointBaseName(ep)
 	urlFormatted := formatPathForJS(ep.Path)
 	var sb strings.Builder
 	sb.WriteString("'use server';\n\n")
@@ -180,13 +183,6 @@ func uncapitalize(s string) string {
 		return ""
 	}
 	return strings.ToLower(s[:1]) + s[1:]
-}
-
-func optionalColon(isOptional bool) string {
-	if isOptional {
-		return "?"
-	}
-	return ""
 }
 
 func dataParamIfBody(hasBody bool) string {

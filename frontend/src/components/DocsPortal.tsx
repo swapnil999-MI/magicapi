@@ -12,11 +12,6 @@ import {
   Clock,
   Sparkles,
   ArrowUpDown,
-  Layers,
-  FileCode,
-  CheckCircle2,
-  AlertTriangle,
-  XCircle,
 } from 'lucide-react';
 
 export const DocsPortal: React.FC = () => {

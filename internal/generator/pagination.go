@@ -20,10 +20,7 @@ func (pg *PaginationGenerator) Generate(ep *spec.IndexedEndpoint) string {
 		return "// Endpoint not found"
 	}
 
-	baseName := sanitizeIdentifier(ep.OperationID)
-	if baseName == "" {
-		baseName = sanitizeIdentifier(ep.Method + "_" + strings.ReplaceAll(ep.Path, "/", "_"))
-	}
+	baseName := endpointBaseName(ep)
 	urlFormatted := formatPathForJS(ep.Path)
 
 	// Check pagination style
@@ -46,8 +43,8 @@ func (pg *PaginationGenerator) Generate(ep *spec.IndexedEndpoint) string {
 		sb.WriteString(fmt.Sprintf("export const useInfinite%s = (baseParams: Omit<%sParams, 'cursor'>) => {\n", baseName, baseName))
 		sb.WriteString("  return useInfiniteQuery({\n")
 		sb.WriteString(fmt.Sprintf("    queryKey: ['%s', 'infinite', baseParams],\n", strings.ToLower(baseName)))
-		sb.WriteString(fmt.Sprintf("    queryFn: async ({ pageParam = '' }) => {\n"))
-		sb.WriteString(fmt.Sprintf("      const params = { ...baseParams, cursor: pageParam };\n"))
+		sb.WriteString("    queryFn: async ({ pageParam = '' }) => {\n")
+		sb.WriteString("      const params = { ...baseParams, cursor: pageParam };\n")
 		sb.WriteString(fmt.Sprintf("      const res = await axios.get<%sResponse>(`%s`, { params });\n", baseName, urlFormatted))
 		sb.WriteString("      return res.data;\n    },\n")
 		sb.WriteString("    initialPageParam: '',\n")
@@ -59,8 +56,8 @@ func (pg *PaginationGenerator) Generate(ep *spec.IndexedEndpoint) string {
 		sb.WriteString("  const [pageSize, setPageSize] = useState(initialPageSize);\n\n")
 		sb.WriteString("  const query = useQuery({\n")
 		sb.WriteString(fmt.Sprintf("    queryKey: ['%s', 'paginated', page, pageSize, filters],\n", strings.ToLower(baseName)))
-		sb.WriteString(fmt.Sprintf("    queryFn: async () => {\n"))
-		sb.WriteString(fmt.Sprintf("      const params = { ...filters, page, page_size: pageSize, limit: pageSize };\n"))
+		sb.WriteString("    queryFn: async () => {\n")
+		sb.WriteString("      const params = { ...filters, page, page_size: pageSize, limit: pageSize };\n")
 		sb.WriteString(fmt.Sprintf("      const res = await axios.get<%sResponse>(`%s`, { params });\n", baseName, urlFormatted))
 		sb.WriteString("      return res.data;\n    },\n")
 		sb.WriteString("    placeholderData: (prev) => prev,\n")

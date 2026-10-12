@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useStudioStore } from '../store/useStudioStore';
 import Editor from '@monaco-editor/react';
-import { X, Copy, Check, Code, FileCode, Layers, Shield } from 'lucide-react';
+import { X, Copy, Check, FileCode } from 'lucide-react';
 import { schemaToTypeScript, schemaToZod, schemaToGo, schemaToPydantic } from '../utils/typeGenerator';
 
 export const TypeGeneratorModal: React.FC = () => {

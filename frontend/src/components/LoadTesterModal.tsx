@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStudioStore } from '../store/useStudioStore';
-import { X, Play, Activity, CheckCircle2, XCircle, Gauge, Timer, Zap, BarChart2 } from 'lucide-react';
+import { X, Play, Activity, CheckCircle2, XCircle, BarChart2 } from 'lucide-react';
 
 interface BenchmarkResult {
   totalRequests: number;
@@ -22,7 +22,7 @@ export const LoadTesterModal: React.FC = () => {
 
   const [totalReqs, setTotalReqs] = useState<number>(30);
   const [concurrency, setConcurrency] = useState<number>(5);
-  const [delayMs, setDelayMs] = useState<number>(0);
+  const [delayMs] = useState<number>(0);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [completedCount, setCompletedCount] = useState<number>(0);
   const [result, setResult] = useState<BenchmarkResult | null>(null);

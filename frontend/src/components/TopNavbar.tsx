@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStudioStore } from '../store/useStudioStore';
-import { Rocket, BookOpen, Zap, Target, Layers, Search, Globe, Moon, Sun, Monitor, Sparkles, Workflow } from 'lucide-react';
+import { BookOpen, Zap, Target, Layers, Search, Globe, Workflow } from 'lucide-react';
 
 export const TopNavbar: React.FC = () => {
   const {
@@ -18,8 +18,6 @@ export const TopNavbar: React.FC = () => {
     setCmdPaletteOpen,
   } = useStudioStore();
 
-  const logoSrc = theme === 'light' ? '/magicapi-logo-light.png' : '/magicapi-logo.png';
-
   return (
     <header className="h-14 bg-[var(--bg-sidebar)] border-b border-[var(--border-color)] flex items-center justify-between px-4 select-none shrink-0 z-50 gap-4">
       {/* ZONE 1: Left Brand & Navigation */}
@@ -27,9 +25,9 @@ export const TopNavbar: React.FC = () => {
         <div className="flex items-center gap-2.5 group cursor-pointer">
           <div className="relative flex items-center justify-center h-9 w-9 bg-transparent transition-transform duration-200 group-hover:scale-110 shrink-0">
             <img 
-              src={logoSrc} 
+              src="/icon-512.png" 
               alt="MagicAPI Logo" 
-              className="w-full h-full object-contain filter drop-shadow-[0_2px_8px_rgba(168,85,247,0.4)] group-hover:drop-shadow-[0_4px_14px_rgba(168,85,247,0.65)] transition-all" 
+              className="w-full h-full object-contain rounded-lg filter drop-shadow-[0_2px_8px_rgba(168,85,247,0.4)] group-hover:drop-shadow-[0_4px_14px_rgba(168,85,247,0.65)] transition-all" 
             />
           </div>
           <div className="flex items-center gap-2">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useStudioStore } from '../store/useStudioStore';
-import { Search, X, Zap, Moon, Sun, Monitor, Layers, Globe, Download, Upload, FileJson, FileCode } from 'lucide-react';
+import { Search, Zap, Moon, Sun, Monitor, Layers, Globe, Download, Upload, FileJson, FileCode } from 'lucide-react';
 
 export const CommandPaletteModal: React.FC = () => {
   const [query, setQuery] = useState('');

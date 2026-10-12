@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -23,8 +24,9 @@ import (
 	"openapi-doc-studio/internal/spec"
 )
 
+const sseHeartbeatInterval = 15 * time.Second
+
 type Session struct {
-	ID       string
 	MsgChan  chan *mcp.JSONRPCMessage
 	DoneChan chan struct{}
 }
@@ -32,7 +34,6 @@ type Session struct {
 type UnifiedServer struct {
 	cfg      *config.Config
 	server   *mcp.Server
-	specData *spec.OpenAPISpec
 	loader   *spec.Loader
 	distFS   fs.FS
 	sessions map[string]*Session
@@ -45,7 +46,6 @@ func NewUnifiedServer(cfg *config.Config, server *mcp.Server, loader *spec.Loade
 		server:   server,
 		loader:   loader,
 		distFS:   distFS,
-		specData: loader.GetSpec(),
 		sessions: make(map[string]*Session),
 	}
 }
@@ -150,7 +150,7 @@ func (us *UnifiedServer) handleInfo(c *fiber.Ctx) error {
 		"description": specData.Info.Description,
 		"paths_count": len(specData.Paths),
 		"servers":     specData.Servers,
-		"tools_count": 13,
+		"tools_count": us.server.ToolCount(),
 		"mcp_url":     fmt.Sprintf("http://%s:%s/sse", us.cfg.Host, us.cfg.Port),
 	})
 }
@@ -163,7 +163,6 @@ func (us *UnifiedServer) handleSSE(c *fiber.Ctx) error {
 
 	sessionID := uuid.New().String()
 	sess := &Session{
-		ID:       sessionID,
 		MsgChan:  make(chan *mcp.JSONRPCMessage, 50),
 		DoneChan: make(chan struct{}),
 	}
@@ -191,6 +190,11 @@ func (us *UnifiedServer) handleSSE(c *fiber.Ctx) error {
 			return
 		}
 
+		// A disconnect only surfaces as a failed write, so ping periodically;
+		// otherwise an idle disconnected client would hold this session forever.
+		heartbeat := time.NewTicker(sseHeartbeatInterval)
+		defer heartbeat.Stop()
+
 		for {
 			select {
 			case msg, ok := <-sess.MsgChan:
@@ -203,6 +207,11 @@ func (us *UnifiedServer) handleSSE(c *fiber.Ctx) error {
 					if err := w.Flush(); err != nil {
 						return
 					}
+				}
+			case <-heartbeat.C:
+				fmt.Fprint(w, ": ping\n\n")
+				if err := w.Flush(); err != nil {
+					return
 				}
 			case <-sess.DoneChan:
 				return
@@ -314,7 +323,6 @@ func (us *UnifiedServer) startHTTP3Listener() {
 
 		sessionID := uuid.New().String()
 		sess := &Session{
-			ID:       sessionID,
 			MsgChan:  make(chan *mcp.JSONRPCMessage, 50),
 			DoneChan: make(chan struct{}),
 		}

@@ -258,6 +258,16 @@ func (idx *Indexer) GetCategories() []Tag {
 	return idx.tags
 }
 
+// EndpointsByTag returns the endpoints carrying exactly this tag (unlike Search, which matches tag substrings).
+func (idx *Indexer) EndpointsByTag(tag string) []IndexedEndpoint {
+	idx.mu.RLock()
+	defer idx.mu.RUnlock()
+	eps := idx.byTag[tag]
+	out := make([]IndexedEndpoint, len(eps))
+	copy(out, eps)
+	return out
+}
+
 func (idx *Indexer) GetSchema(name string) (*Schema, bool) {
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()

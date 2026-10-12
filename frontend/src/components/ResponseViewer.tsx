@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useStudioStore } from '../store/useStudioStore';
 import Editor, { DiffEditor } from '@monaco-editor/react';
 import { JsonTreeView } from './JsonTreeView';
-import { Pin, Copy, Download, Maximize2, Check, Search, FileCode, GitCompare, GitBranch, CheckCircle2, XCircle, FlaskConical } from 'lucide-react';
+import { Pin, Copy, Download, Maximize2, Check, Search, CheckCircle2, XCircle, FlaskConical } from 'lucide-react';
 
 export const ResponseViewer: React.FC = () => {
   const [activeRespTab, setActiveRespTab] = useState<'body' | 'headers' | 'tests'>('body');

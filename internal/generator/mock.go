@@ -135,6 +135,9 @@ func (mg *MockGenerator) generateValueFromSchema(s *spec.Schema, depth int) any 
 }
 
 func (mg *MockGenerator) generateFieldMock(fieldName string, s *spec.Schema, depth int) any {
+	if s == nil {
+		return nil
+	}
 	if s.Example != nil {
 		return s.Example
 	}
@@ -145,33 +148,65 @@ func (mg *MockGenerator) generateFieldMock(fieldName string, s *spec.Schema, dep
 		return s.Enum[0]
 	}
 
+	// Field-name hints only apply when they fit the schema's type,
+	// so e.g. an "api_keys" array or a "gateway" object is never mocked as a string.
+	if hint, ok := fieldNameHint(fieldName); ok && hintFitsSchema(hint, mg.loader.ResolveSchema(s)) {
+		return hint
+	}
+	return mg.generateValueFromSchema(s, depth)
+}
+
+func fieldNameHint(fieldName string) (any, bool) {
 	lower := strings.ToLower(fieldName)
 	switch {
 	case strings.Contains(lower, "email"):
-		return "client_test@magicapi.dev"
+		return "client_test@magicapi.dev", true
 	case strings.Contains(lower, "phone") || strings.Contains(lower, "mobile"):
-		return "+919876543210"
+		return "+919876543210", true
 	case strings.Contains(lower, "mid"):
-		return 100021
+		return 100021, true
 	case strings.Contains(lower, "client_id") || strings.Contains(lower, "clientid"):
-		return 501
+		return 501, true
 	case strings.Contains(lower, "amount"):
-		return 50000.00
+		return 50000.00, true
 	case strings.Contains(lower, "currency"):
-		return "INR"
+		return "INR", true
 	case strings.Contains(lower, "status"):
-		return "ACTIVE"
+		return "ACTIVE", true
 	case strings.Contains(lower, "gateway"):
-		return "CASHFREE"
+		return "CASHFREE", true
 	case strings.Contains(lower, "service"):
-		return "PAYIN"
+		return "PAYIN", true
 	case strings.Contains(lower, "created_at") || strings.Contains(lower, "updated_at"):
-		return time.Now().UTC().Format(time.RFC3339)
+		return time.Now().UTC().Format(time.RFC3339), true
 	case strings.Contains(lower, "token") || strings.Contains(lower, "secret") || strings.Contains(lower, "key"):
-		return "magic_sec_test_99281726354"
+		return "magic_sec_test_99281726354", true
 	case strings.Contains(lower, "url"):
-		return "https://api.magicapi.dev/webhook/callback"
-	default:
-		return mg.generateValueFromSchema(s, depth)
+		return "https://api.magicapi.dev/webhook/callback", true
 	}
+	return nil, false
+}
+
+// hintFitsSchema reports whether a hinted scalar value is valid for the (resolved) schema.
+func hintFitsSchema(hint any, s *spec.Schema) bool {
+	if s == nil || s.Example != nil || len(s.Enum) > 0 ||
+		len(s.Properties) > 0 || len(s.OneOf) > 0 || len(s.AnyOf) > 0 || len(s.AllOf) > 0 || s.Items != nil {
+		return false
+	}
+	switch s.Type {
+	case "":
+		return true
+	case "string":
+		_, ok := hint.(string)
+		return ok
+	case "integer":
+		_, ok := hint.(int)
+		return ok
+	case "number":
+		switch hint.(type) {
+		case int, float64:
+			return true
+		}
+	}
+	return false
 }

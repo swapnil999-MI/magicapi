@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStudioStore } from '../store/useStudioStore';
-import { Folder, Clock, Bookmark, Search, ChevronDown, ChevronRight, Trash2, Plus, Sparkles, Check, Zap } from 'lucide-react';
+import { Folder, Clock, Bookmark, Search, ChevronDown, ChevronRight, Trash2, Plus, Sparkles, Check } from 'lucide-react';
 import { ContextMenu } from './ContextMenu';
 
 interface SidebarProps {
